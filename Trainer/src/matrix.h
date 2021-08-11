@@ -75,11 +75,11 @@ namespace Trainer
 			std::fill(data.begin(), data.end(), val);
 		}
 
-		void randomize()
+		void randomize(int inputs)
 		{
-			std::random_device rd;
-			std::mt19937 gen(rd());
-			std::uniform_real_distribution distrib(-1.0f, 1.0f);
+			double a = 1 / sqrt((double)inputs);
+			std::mt19937 gen(74391987);
+			std::uniform_real_distribution distrib(-a, a);
 
 			*this = for_each([&](T const&) { return distrib(gen); });
 		}

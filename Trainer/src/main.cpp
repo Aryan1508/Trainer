@@ -33,8 +33,8 @@ double get_cost(Trainer::Network& net)
 
 		auto sample = Trainer::position_to_input(position);
 
-		cost += pow(target - net.output_neuron, 2);
 	    net.back_propagate(sample, target);
+		cost += pow(target - net.output_neuron, 2);
 	}
 	fil.close();
 

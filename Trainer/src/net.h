@@ -28,6 +28,8 @@ namespace Trainer
 		return x > 0 ? 1 : 0;
 	}
 
+	constexpr int TOTAL_INPUTS = 
+
 	class Network
 	{
 	public:
@@ -37,19 +39,19 @@ namespace Trainer
 		Matrix<512, 768> hidden_weights;
 		Matrix<  1, 512> output_weights;
 
-		Matrix<512, 1> hidden_bias;
-		Matrix<  1,  1> output_bias;
+		Matrix<512, 1> hidden_biases;
+		Matrix<  1, 1> output_bias;
 
 		Matrix<512, 1> hidden_error;
 		double         output_error;
 
 		Network()
 		{
-			hidden_weights.randomize();
-			output_weights.randomize();
+			hidden_weights.randomize(768);
+			output_weights.randomize(512);
 
-			hidden_bias.randomize();
-			output_bias.randomize();
+			hidden_biases.randomize(768);
+			output_bias.randomize(512);
 
 			hidden_neurons.set(0);
 			hidden_error.set(0);
@@ -59,9 +61,8 @@ namespace Trainer
 
 		double feed(Matrix<768, 1> const& sample)
 		{
-			hidden_neurons = (hidden_weights * sample + hidden_bias).for_each(relu);
+			hidden_neurons = (hidden_weights * sample + hidden_biases).for_each(relu);
 			output_neuron =  (output_weights * hidden_neurons + output_bias).for_each(sigmoid).get(0);
-
 			return output_neuron;
 		}
 
@@ -73,16 +74,17 @@ namespace Trainer
 				hidden_error.get(i) = hidden_neurons.get(i) > 0 ? output_error * output_weights.get(i) : 0;
 		}
 
-		void validateGradients(Matrix<768, 1> const& sample, double target)
+		void updateWeights(Matrix<768, 1> const& sample)
 		{
+			double rate = 0.2;
 			for (int i = 0; i < hidden_neurons.totalRows(); i++)
 			{
 				for (int j = 0; j < sample.totalRows(); j++)
 				{
-					hidden_weights.get(i, j) -= 0.01 * sample.get(j) * hidden_error.get(i);
+					hidden_weights.get(i, j) -= rate * sample.get(j) * hidden_error.get(i);
 				}
-				hidden_bias.get(i) -= 0.01 * hidden_error.get(i);
-				output_weights.get(i) -= 0.01 * output_error * hidden_error.get(i);
+				hidden_biases.get(i) -= rate * hidden_error.get(i);
+				output_weights.get(i) -= rate * output_error * hidden_error.get(i);
 
 				/*double E1 = cost(sample, target);
 				output_weights.get(i) += 1e-6;
@@ -111,7 +113,7 @@ namespace Trainer
 			feed(sample);
 			calculate_errors(target);
 			//update();
-			validateGradients(sample, target);
+			updateWeights(sample);
 		}
 	};
 }
