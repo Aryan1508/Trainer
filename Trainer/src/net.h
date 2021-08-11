@@ -41,7 +41,6 @@ public:
 				weights.back().randomize();
 			}
 		}
-		init();
 	}
 
 	Matrix const& feed(Matrix const& sample)
