@@ -19,11 +19,40 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\attacks.h" />
+    <ClInclude Include="src\bitboard.h" />
+    <ClInclude Include="src\bitmask.h" />
+    <ClInclude Include="src\board.h" />
+    <ClInclude Include="src\fixed_list.h" />
+    <ClInclude Include="src\mappings.h" />
+    <ClInclude Include="src\history.h" />
+    <ClInclude Include="src\magicmoves.hpp" />
     <ClInclude Include="src\matrix.h" />
+    <ClInclude Include="src\misc.h" />
+    <ClInclude Include="src\move.h" />
+    <ClInclude Include="src\movelist.h" />
     <ClInclude Include="src\net.h" />
+    <ClInclude Include="src\piece.h" />
+    <ClInclude Include="src\position.h" />
+    <ClInclude Include="src\position_undo.h" />
+    <ClInclude Include="src\Square.h" />
+    <ClInclude Include="src\stopwatch.h" />
+    <ClInclude Include="src\stringparse.h" />
+    <ClInclude Include="src\zobrist.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\board.cpp" />
+    <ClCompile Include="src\fenparse.cpp" />
+    <ClCompile Include="src\legalcheck.cpp" />
+    <ClCompile Include="src\magicmoves.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\move.cpp" />
+    <ClCompile Include="src\movegen.cpp" />
+    <ClCompile Include="src\piece.cpp" />
+    <ClCompile Include="src\position.cpp" />
+    <ClCompile Include="src\square.cpp" />
+    <ClCompile Include="src\stringparse.cpp" />
+    <ClCompile Include="src\zobrist.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

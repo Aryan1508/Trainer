@@ -4,83 +4,88 @@
 #include <cassert>
 #include <algorithm>
 
-class Matrix
+namespace Trainer
 {
-public:
-	using T = double;
 
-	Matrix(int rows, int cols)
-		: rows(rows), cols(cols)
+	class Matrix
 	{
-		data.resize(rows * cols, T());
-	}
+	public:
+		using T = double;
 
-	T& get(int row, int col)
-	{
-		return data[row * cols + col];
-	}
-	
-	T const& get(int row, int col) const
-	{
-		return data[row * cols + col];
-	}
+		Matrix(int rows, int cols)
+			: rows(rows), cols(cols)
+		{
+			data.resize(rows * cols, T());
+		}
 
-	T& get(int i)
-	{
-		return data[i];
-	}
+		T& get(int row, int col)
+		{
+			return data[row * cols + col];
+		}
 
-	T const& get(int i) const
-	{
-		return data[i];
-	}
+		T const& get(int row, int col) const
+		{
+			return data[row * cols + col];
+		}
 
-	int totalRows() const
-	{
-		return rows;
-	}
+		T& get(int i)
+		{
+			return data[i];
+		}
 
-	int totalCols() const
-	{
-		return cols;
-	}
+		T const& get(int i) const
+		{
+			return data[i];
+		}
 
-	template<typename Callable>
-	Matrix forEach(Callable F) const
-	{
-		Matrix out(rows, cols);
-		
-		for (int i = 0; i < data.size(); i++)
-			out.get(i) = F(get(i));
-		return out;
-	}
+		int totalRows() const
+		{
+			return rows;
+		}
 
-	void set(T const& val)
-	{
-		std::fill(data.begin(), data.end(), val);
-	}
+		int totalCols() const
+		{
+			return cols;
+		}
 
-	void randomize()
-	{
-		std::mt19937 gen(4312987);
-		std::uniform_real_distribution distrib(-1.0f, 1.0f);
-	
-		*this = forEach([&](T const& x) { return distrib(gen); });
-	}
+		template<typename Callable>
+		Matrix for_each(Callable F) const
+		{
+			Matrix out(rows, cols);
 
-	int size() const
-	{
-		return static_cast<int>(data.size());
-	}
-private:
-	std::vector<T> data;
-	int rows, cols;
-};
+			for (int i = 0; i < data.size(); i++)
+				out.get(i) = F(get(i));
+			return out;
+		}
 
-inline Matrix operator+(Matrix const& lhs, Matrix const& rhs)
+		void set(T const& val)
+		{
+			std::fill(data.begin(), data.end(), val);
+		}
+
+		void randomize()
+		{
+			std::random_device rd;
+			std::mt19937 gen(43199807);
+			std::uniform_real_distribution distrib(-1.0f, 1.0f);
+
+			*this = for_each([&](T const&) { return distrib(gen); });
+		}
+
+		int size() const
+		{
+			return static_cast<int>(data.size());
+		}
+	private:
+		std::vector<T> data;
+		int rows, cols;
+	};
+}
+
+inline Trainer::Matrix operator+(Trainer::Matrix const& lhs, Trainer::Matrix const& rhs)
 {
 	assert(lhs.totalRows() == rhs.totalRows() && lhs.totalCols() == rhs.totalCols());
-	Matrix out(lhs.totalRows(), lhs.totalCols());
+	Trainer::Matrix out(lhs.totalRows(), lhs.totalCols());
 
 	for (int i = 0; i < lhs.size(); i++)
 		out.get(i) = lhs.get(i) + rhs.get(i);
@@ -88,10 +93,10 @@ inline Matrix operator+(Matrix const& lhs, Matrix const& rhs)
 	return out;
 }
 
-inline Matrix operator-(Matrix const& lhs, Matrix const& rhs)
+inline Trainer::Matrix operator-(Trainer::Matrix const& lhs, Trainer::Matrix const& rhs)
 {
 	assert(lhs.totalRows() == rhs.totalRows() && lhs.totalCols() == rhs.totalCols());
-	Matrix out(lhs.totalRows(), lhs.totalCols());
+	Trainer::Matrix out(lhs.totalRows(), lhs.totalCols());
 
 	for (int i = 0; i < lhs.size(); i++)
 		out.get(i) = lhs.get(i) - rhs.get(i);
@@ -99,17 +104,17 @@ inline Matrix operator-(Matrix const& lhs, Matrix const& rhs)
 	return out;
 }
 
-inline Matrix operator*(Matrix const& lhs, Matrix const& rhs)
+inline Trainer::Matrix operator*(Trainer::Matrix const& lhs, Trainer::Matrix const& rhs)
 {
 	assert(lhs.totalCols() == rhs.totalRows());
 
-	Matrix out(lhs.totalRows(), rhs.totalCols());
+	Trainer::Matrix out(lhs.totalRows(), rhs.totalCols());
 
 	for (int i = 0; i < lhs.totalRows(); i++)
 	{
 		for (int j = 0; j < rhs.totalCols(); j++)
 		{
-			Matrix::T sum = 0;
+			Trainer::Matrix::T sum = 0;
 			for (int k = 0; k < lhs.totalCols(); k++)
 				sum += lhs.get(i, k) * rhs.get(k, j);
 
@@ -119,7 +124,7 @@ inline Matrix operator*(Matrix const& lhs, Matrix const& rhs)
 	return out;
 }
 
-inline Matrix operator*(Matrix const& lhs, Matrix::T scalar)
+inline Trainer::Matrix operator*(Trainer::Matrix const& lhs, Trainer::Matrix::T scalar)
 {
-	return lhs.forEach([=](Matrix::T x) { return x * scalar; });
+	return lhs.for_each([=](Trainer::Matrix::T x) { return x * scalar; });
 }
