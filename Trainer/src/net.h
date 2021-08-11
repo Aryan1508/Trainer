@@ -130,7 +130,7 @@ namespace Trainer
 				}
 
 				hidden_bias_deltas.get(i) += hidden_error.get(i);
-				output_weight_deltas.get(i) += output_error * hidden_error.get(i);
+				output_weight_deltas.get(i) += output_error * hidden_neurons.get(i);
 			}
 			output_bias_deltas.get(0) += output_error;
 		}
