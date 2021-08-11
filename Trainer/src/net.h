@@ -85,69 +85,7 @@ public:
 	{
 		return pow(feed(sample).get(0) - target.get(0), 2);
 	}
-
-	void validateGradients(Matrix const& sample, Matrix const& target)
-	{
-		for (std::size_t i = 1; i < neurons.size(); i++)
-		{
-			for (int neuron = 0; neuron < neurons[i].totalCols(); neuron++)
-			{
-				double errorSignal = errors[i].get(neuron);
-
-				for (int prevNeuron = 0; prevNeuron < neurons[i - 1].totalRows(); prevNeuron++)
-				{
-					double gradient = neurons[i - 1].get(prevNeuron) * errorSignal;
-
-					double delta = 0.001;
-
-					double E1 = cost(sample, target);
-
-					weights[i - 1].get(neuron, prevNeuron) += delta;
-
-					double E2 = cost(sample, target);
-					weights[i - 1].get(neuron, prevNeuron) -= delta;
-
-					double FD = (E2 - E1) / delta;
-
-					double avg = FD + gradient;
-					double diff = std::abs(FD - gradient);
-
-					if (std::abs(diff / avg * 100) >= 1 && !isnan(diff / avg * 100))
-					{
-						std::cout << std::fixed << std::setprecision(7) << diff / avg * 100 << "%\n";
-						std::cerr << "ERROR weight gradient\n";
-						std::terminate();
-						std::cin.get();
-					}
-				}
-				double gradient = errorSignal;
-
-				double delta = 0.001;
-
-				double E1 = cost(sample, target);
-
-				biases[i - 1].get(neuron) += delta;
-
-				double E2 = cost(sample, target);
-				biases[i - 1].get(neuron) -= delta;
-
-
-				double FD = (E2 - E1) / delta;
-
-				double avg = FD + gradient;
-				double diff = std::abs(FD - gradient);
-
-				if (std::abs(diff / avg * 100) >= 1 && !isnan(diff / avg * 100))
-				{
-					std::cout << std::fixed << std::setprecision(7) << diff / avg * 100 << "%\n";
-					std::cerr << "ERROR bias gradient\n";
-					std::terminate();
-					std::cin.get();
-				}
-			}
-		}
-	}
-
+	
 	void update()
 	{
 		for (std::size_t i = 1; i < neurons.size(); i++)
@@ -171,6 +109,5 @@ public:
 		feed(sample);
 		calculateErrors(target);
 		update();
-		//validateGradients(sample, target);
 	}
 };
