@@ -51,6 +51,12 @@ int main()
 {
 	Trainer::Network* net = new Trainer::Network;
 
-	while (1)
+	StopWatch watch;
+	watch.go();
+	int i = 10;
+	while (i--)
 		std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
+	watch.stop();
+
+	std::cout << watch.elapsed_time().count() << '\n';
 }
