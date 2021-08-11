@@ -48,8 +48,6 @@ int main()
 {
 	Trainer::Network* net = new Trainer::Network;
 
-    while (1)
-    {
-        std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
-    }
+	while (1)
+		std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
 }
