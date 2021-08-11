@@ -14,26 +14,26 @@ double get_cost(Trainer::Network& net)
 
 	int i = 0;
 	Position position;
-	std::ifstream fil("C:/tuning/shuffled_depth_6");
+	std::ifstream fil("C:/tuning/lichess-quiet.txt");
 
 	for (std::string line; std::getline(fil, line);)
 	{
 		if (++i >= NPOSITINOS)
 			break;
 
-		Trainer::Matrix target(1, 1);
+		double target = 0;
 
 		std::string fen = line.substr(0, line.find("[") - 1);
 
-		if (line.find("[1.0]") != line.npos)        target.get(0) = 1.0;
-		else if (line.find("[0.0]") != line.npos)   target.get(0) = 0.0;
-		else                                      target.get(0) = 0.5;
+		if (line.find("[1.0]") != line.npos)        target = 1.0;
+		else if (line.find("[0.0]") != line.npos)   target = 0.0;
+		else                                        target = 0.5;
 
 		position.set_fen(fen);
 
 		auto sample = Trainer::position_to_input(position);
 
-		cost += pow(target.get(0) - net.neurons.back().get(0), 2);
+		cost += pow(target - net.output_neuron, 2);
 	    net.back_propagate(sample, target);
 	}
 	fil.close();
@@ -43,10 +43,10 @@ double get_cost(Trainer::Network& net)
 
 int main()
 {
-	Trainer::Network net({ 768, 16, 1 });
+	Trainer::Network* net = new Trainer::Network;
 
     while (1)
     {
-        std::cout << "Cost over " << NPOSITINOS << " positions: " << std::fixed << std::setprecision(8) << get_cost(net) << '\n';
+        std::cout << "Cost over " << NPOSITINOS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
     }
 }

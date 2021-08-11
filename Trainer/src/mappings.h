@@ -4,9 +4,9 @@
 
 namespace Trainer
 {
-	Matrix position_to_input(Position const& position)
+	Matrix<768, 1> position_to_input(Position const& position)
 	{
-		Matrix mat(64 * 12, 1);
+		Matrix<768, 1> mat;
 			
 		for (int i = 0; i < 12; i++)
 		{

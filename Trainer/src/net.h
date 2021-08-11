@@ -31,159 +31,94 @@ namespace Trainer
 	class Network
 	{
 	public:
-		std::vector<Matrix> neurons;
-		std::vector<Matrix> weights;
-		std::vector<Matrix> biases;
-		std::vector<Matrix> errors;
-		std::vector<Matrix> wgradients;
-		std::vector<Matrix> bgradients;
-		std::vector<Matrix> wgrad_total;
-		std::vector<Matrix> bgrad_total;
+		Matrix<512, 1> hidden_neurons;
+		double output_neuron;
+		
+		Matrix<512, 768> hidden_weights;
+		Matrix<  1, 512> output_weights;
 
-		Network(std::vector<int> const& topology)
+		Matrix<512, 1> hidden_bias;
+		Matrix<  1,  1> output_bias;
+
+		Matrix<512, 1> hidden_error;
+		double         output_error;
+
+		Network()
 		{
-			for (int i = 0; i < topology.size(); i++)
-			{
-				neurons.push_back(Matrix(topology[i], 1));
-				errors.push_back(Matrix(topology[i], 1));
+			hidden_weights.randomize();
+			output_weights.randomize();
 
-				neurons.back().set(0);
-				errors.back().set(0);
+			hidden_bias.randomize();
+			output_bias.randomize();
 
-				if (i > 0)
-				{
-					biases.push_back(Matrix(topology[i], 1));
-					biases.back().randomize();
-					weights.push_back(Matrix(topology[i], topology[i - 1]));
-					weights.back().randomize();
-				}
-			}
+			hidden_neurons.set(0);
+			hidden_error.set(0);
+			output_error = 0;
+			output_neuron = 0;
 		}
 
-		Matrix const& feed(Matrix const& sample)
+		double feed(Matrix<768, 1> const& sample)
 		{
-			neurons[0] = sample;
+			hidden_neurons = (hidden_weights * sample + hidden_bias).for_each(relu);
+			output_neuron =  (output_weights * hidden_neurons + output_bias).for_each(sigmoid).get(0);
 
-			for (int i = 1; i < neurons.size(); i++)
-			{
-				Matrix z = (weights[i - 1] * neurons[i - 1] + biases[i - 1]);
-				neurons[i] = i == neurons.size() - 1 ? z.for_each(sigmoid) : z.for_each(relu);
-			}
-
-			return neurons.back();
+			return output_neuron;
 		}
 
-		void calculate_errors(Matrix const& target)
+		void calculate_errors(double target)
 		{
-			errors.back() = (neurons.back() - target) * neurons.back().for_each(sigmoid_prime) * 2;
-
-			for (std::size_t layer = neurons.size() - 2; layer > 0; layer--)
-			{
-				for (int neuron = 0; neuron < neurons[layer].totalRows(); neuron++)
-				{
-					double sum = 0;
-
-					for (int next_neuron = 0; next_neuron < neurons[layer + 1].totalRows(); next_neuron++)
-						sum += weights[layer].get(next_neuron, neuron) * errors[layer + 1].get(next_neuron);
-
-					errors[layer].get(neuron) = sum * reluD(neurons[layer].get(neuron));
-				}
-			}
+			output_error = (output_neuron - target) * sigmoid_prime(output_neuron) * 2;
+			
+			for (int i = 0; i < hidden_error.size(); i++)
+				hidden_error.get(i) = hidden_neurons.get(i) > 0 ? output_error * output_weights.get(i) : 0;
 		}
 
-		void validateGradients(Matrix const& sample, Matrix const& target)
+		void validateGradients(Matrix<768, 1> const& sample, double target)
 		{
-			for (std::size_t i = 1; i < neurons.size(); i++)
+			Matrix<1  , 512> output_weights_gradient  = (hidden_neurons * output_error).transpose();
+
+			for (int i = 0; i < hidden_neurons.totalRows(); i++)
 			{
-				for (int neuron = 0; neuron < neurons[i].totalCols(); neuron++)
+				for (int j = 0; j < sample.totalRows(); j++)
 				{
-					double errorSignal = errors[i].get(neuron);
+					double gradient = sample.get(j) * hidden_error.get(i);
+					hidden_weights.get(i, j) -= 0.1 * gradient;
 
-					for (int prevNeuron = 0; prevNeuron < neurons[i - 1].totalRows(); prevNeuron++)
-					{
-						double gradient = neurons[i - 1].get(prevNeuron) * errorSignal;
-
-						double delta = 0.001;
-
-						double E1 = cost(sample, target);
-
-						weights[i - 1].get(neuron, prevNeuron) += delta;
-
-						double E2 = cost(sample, target);
-						weights[i - 1].get(neuron, prevNeuron) -= delta;
-
-						double FD = (E2 - E1) / delta;
-
-						double avg = FD + gradient;
-						double diff = std::abs(FD - gradient);
-                        double deviation = diff / avg * 100;
-
-						if (std::abs(diff / avg * 100) >= 1 && !isnan(diff / avg * 100))
-						{
-							std::cerr << "ERROR weight gradient\n";
-							std::terminate();
-							std::cin.get();
-						}
-					}
-					double gradient = errorSignal;
-					double delta = 0.001;
-
-					double E1 = cost(sample, target);
-
-					biases[i - 1].get(neuron) += delta;
-
+			/*		double E1 = cost(sample, target);
+					hidden_weights.get(i, j) += 1e-6;
 					double E2 = cost(sample, target);
-					biases[i - 1].get(neuron) -= delta;
+					hidden_weights.get(i, j) -= 1e-6;
 
-
-					double FD = (E2 - E1) / delta;
-
-					double avg = FD + gradient;
-					double diff = std::abs(FD - gradient);
+					double fd = (E2 - E1) / 1e-6;
+					double avg = (fd + gradient) / 2;
+					double diff = std::abs(fd - gradient);
 					double deviation = diff / avg * 100;
-
-					if (deviation >= 1 && !std::isnan(deviation))
+					
+					if (!isnan(deviation) && fd)
 					{
-						std::cout << std::fixed << std::setprecision(7) << diff / avg * 100 << "%\n";
-						std::cerr << "ERROR bias gradient\n";
-						std::terminate();
-						std::cin.get();
-					}
+						std::cout << "Gradient: " << gradient << '\n';
+						std::cout << "FD: " << fd << '\n';
+						std::cout << "Deviation: " << deviation << "%\n";
+
+						if (deviation >= 1)
+							std::cin.get();
+					}*/
 				}
+				hidden_bias.get(i) -= 0.1 * hidden_error.get(i);
 			}
 		}
 
-		double cost(Matrix const& sample, Matrix const& target)
+		double cost(Matrix<768, 1> const& sample, double target)
 		{
-			return pow(feed(sample).get(0) - target.get(0), 2);
+			return pow(feed(sample) - target, 2);
 		}
 
-		void update()
-		{
-			for (std::size_t i = 1; i < neurons.size(); i++)
-			{
-				for (int neuron = 0; neuron < neurons[i].totalCols(); neuron++)
-				{
-					double error_signal = errors[i].get(neuron);
-
-					for (int prev_neuron = 0; prev_neuron < neurons[i - 1].totalRows(); prev_neuron++)
-					{
-						double gradient = neurons[i - 1].get(prev_neuron) * error_signal;
-
-						weights[i - 1].get(neuron, prev_neuron) -= 0.01 * gradient;
-					}
-					biases[i - 1].get(neuron) -= 0.01 * error_signal;
-				}
-			}
-		}
-
-
-		void back_propagate(Matrix const& sample, Matrix const& target)
+		void back_propagate(Matrix<768, 1> const& sample, double target)
 		{
 			feed(sample);
 			calculate_errors(target);
-			 update();
-			//validateGradients(sample, target);
+			//update();
+			validateGradients(sample, target);
 		}
 	};
 }

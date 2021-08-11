@@ -1,31 +1,31 @@
 #pragma once
 #include <vector>
+#include <array>
 #include <random>
 #include <cassert>
 #include <algorithm>
 
 namespace Trainer
 {
-
+	template<int X, int Y> 
 	class Matrix
 	{
 	public:
 		using T = double;
 
-		Matrix(int rows, int cols)
-			: rows(rows), cols(cols)
+		Matrix()
 		{
-			data.resize(rows * cols, T());
+			data.resize(X * Y);
 		}
 
 		T& get(int row, int col)
 		{
-			return data[row * cols + col];
+			return data[row * Y + col];
 		}
 
 		T const& get(int row, int col) const
 		{
-			return data[row * cols + col];
+			return data[row * Y + col];
 		}
 
 		T& get(int i)
@@ -38,23 +38,35 @@ namespace Trainer
 			return data[i];
 		}
 
-		int totalRows() const
+		constexpr int totalRows() const
 		{
-			return rows;
+			return X;
 		}
 
-		int totalCols() const
+		constexpr int totalCols() const
 		{
-			return cols;
+			return Y;
 		}
 
 		template<typename Callable>
-		Matrix for_each(Callable F) const
+		Matrix<X, Y> for_each(Callable F) const
 		{
-			Matrix out(rows, cols);
+			Matrix<X, Y> out;
 
 			for (int i = 0; i < data.size(); i++)
 				out.get(i) = F(get(i));
+			return out;
+		}
+
+		Matrix<Y, X> transpose() const
+		{
+			Matrix<Y, X> out;
+
+			for (int i = 0; i < X; i++)
+			{
+				for (int j = 0; j < Y; j++)
+					out.get(j, i) = get(i, j);
+			}
 			return out;
 		}
 
@@ -66,8 +78,8 @@ namespace Trainer
 		void randomize()
 		{
 			std::random_device rd;
-			std::mt19937 gen(43199807);
-			std::uniform_real_distribution distrib(-1.0f, 1.0f);
+			std::mt19937 gen(431);
+			std::uniform_real_distribution distrib(0.0f, 1.0f);
 
 			*this = for_each([&](T const&) { return distrib(gen); });
 		}
@@ -77,15 +89,15 @@ namespace Trainer
 			return static_cast<int>(data.size());
 		}
 	private:
-		std::vector<T> data;
-		int rows, cols;
+		std::vector<double> data;
 	};
 }
 
-inline Trainer::Matrix operator+(Trainer::Matrix const& lhs, Trainer::Matrix const& rhs)
+template<int X1, int Y1> 
+inline Trainer::Matrix<X1, Y1> operator+(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X1, Y1> const& rhs)
 {
 	assert(lhs.totalRows() == rhs.totalRows() && lhs.totalCols() == rhs.totalCols());
-	Trainer::Matrix out(lhs.totalRows(), lhs.totalCols());
+	Trainer::Matrix<X1, Y1> out;
 
 	for (int i = 0; i < lhs.size(); i++)
 		out.get(i) = lhs.get(i) + rhs.get(i);
@@ -93,10 +105,10 @@ inline Trainer::Matrix operator+(Trainer::Matrix const& lhs, Trainer::Matrix con
 	return out;
 }
 
-inline Trainer::Matrix operator-(Trainer::Matrix const& lhs, Trainer::Matrix const& rhs)
+template<int X1, int Y1>
+inline Trainer::Matrix<X1, Y1> operator-(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X1, Y1> const& rhs)
 {
-	assert(lhs.totalRows() == rhs.totalRows() && lhs.totalCols() == rhs.totalCols());
-	Trainer::Matrix out(lhs.totalRows(), lhs.totalCols());
+	Trainer::Matrix<X1, Y1> out;
 
 	for (int i = 0; i < lhs.size(); i++)
 		out.get(i) = lhs.get(i) - rhs.get(i);
@@ -104,17 +116,18 @@ inline Trainer::Matrix operator-(Trainer::Matrix const& lhs, Trainer::Matrix con
 	return out;
 }
 
-inline Trainer::Matrix operator*(Trainer::Matrix const& lhs, Trainer::Matrix const& rhs)
+template<int X1, int Y1, int X2, int Y2>
+inline Trainer::Matrix<X1, Y2> operator*(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X2, Y2> const& rhs)
 {
 	assert(lhs.totalCols() == rhs.totalRows());
 
-	Trainer::Matrix out(lhs.totalRows(), rhs.totalCols());
+	Trainer::Matrix<X1, Y2> out;
 
 	for (int i = 0; i < lhs.totalRows(); i++)
 	{
 		for (int j = 0; j < rhs.totalCols(); j++)
 		{
-			Trainer::Matrix::T sum = 0;
+			double sum = 0;
 			for (int k = 0; k < lhs.totalCols(); k++)
 				sum += lhs.get(i, k) * rhs.get(k, j);
 
@@ -124,7 +137,8 @@ inline Trainer::Matrix operator*(Trainer::Matrix const& lhs, Trainer::Matrix con
 	return out;
 }
 
-inline Trainer::Matrix operator*(Trainer::Matrix const& lhs, Trainer::Matrix::T scalar)
+template<int X1, int Y1>
+inline Trainer::Matrix<X1, Y1> operator*(Trainer::Matrix<X1, Y1> const& lhs, double scalar)
 {
-	return lhs.for_each([=](Trainer::Matrix::T x) { return x * scalar; });
+	return lhs.for_each([=](double x) { return x * scalar; });
 }
