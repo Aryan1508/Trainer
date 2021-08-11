@@ -78,8 +78,8 @@ namespace Trainer
 		void randomize()
 		{
 			std::random_device rd;
-			std::mt19937 gen(431);
-			std::uniform_real_distribution distrib(0.0f, 1.0f);
+			std::mt19937 gen(rd());
+			std::uniform_real_distribution distrib(-1.0f, 1.0f);
 
 			*this = for_each([&](T const&) { return distrib(gen); });
 		}

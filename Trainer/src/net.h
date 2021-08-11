@@ -75,36 +75,29 @@ namespace Trainer
 
 		void validateGradients(Matrix<768, 1> const& sample, double target)
 		{
-			Matrix<1  , 512> output_weights_gradient  = (hidden_neurons * output_error).transpose();
-
 			for (int i = 0; i < hidden_neurons.totalRows(); i++)
 			{
 				for (int j = 0; j < sample.totalRows(); j++)
 				{
-					double gradient = sample.get(j) * hidden_error.get(i);
-					hidden_weights.get(i, j) -= 0.1 * gradient;
-
-			/*		double E1 = cost(sample, target);
-					hidden_weights.get(i, j) += 1e-6;
-					double E2 = cost(sample, target);
-					hidden_weights.get(i, j) -= 1e-6;
-
-					double fd = (E2 - E1) / 1e-6;
-					double avg = (fd + gradient) / 2;
-					double diff = std::abs(fd - gradient);
-					double deviation = diff / avg * 100;
-					
-					if (!isnan(deviation) && fd)
-					{
-						std::cout << "Gradient: " << gradient << '\n';
-						std::cout << "FD: " << fd << '\n';
-						std::cout << "Deviation: " << deviation << "%\n";
-
-						if (deviation >= 1)
-							std::cin.get();
-					}*/
+					hidden_weights.get(i, j) -= 0.01 * sample.get(j) * hidden_error.get(i);
 				}
-				hidden_bias.get(i) -= 0.1 * hidden_error.get(i);
+				hidden_bias.get(i) -= 0.01 * hidden_error.get(i);
+				output_weights.get(i) -= 0.01 * output_error * hidden_error.get(i);
+
+				/*double E1 = cost(sample, target);
+				output_weights.get(i) += 1e-6;
+
+				double E2 = cost(sample, target);
+				output_weights.get(i) -= 1e-6;
+
+				double fd = (E2 - E1) / 1e-6;
+				double avg = (fd + gradient) / 2;
+				double deviation = std::abs(fd - avg) / avg * 100;
+
+				if (!isnan(deviation) && std::fabs(fd) > 0.00000001)
+				{
+					std::cout << deviation << '\n';
+				}*/
 			}
 		}
 

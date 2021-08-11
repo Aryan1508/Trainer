@@ -6,7 +6,7 @@
 #include <fstream>
 #include "stopwatch.h"
 
-#define NPOSITINOS 5000
+#define NPOSITIONS 5000
 
 double get_cost(Trainer::Network& net)
 {
@@ -14,11 +14,11 @@ double get_cost(Trainer::Network& net)
 
 	int i = 0;
 	Position position;
-	std::ifstream fil("C:/tuning/lichess-quiet.txt");
+	std::ifstream fil("C:/tuning/shuffled_depth_6");
 
 	for (std::string line; std::getline(fil, line);)
 	{
-		if (++i >= NPOSITINOS)
+		if (++i >= NPOSITIONS)
 			break;
 
 		double target = 0;
@@ -47,6 +47,6 @@ int main()
 
     while (1)
     {
-        std::cout << "Cost over " << NPOSITINOS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
+        std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
     }
 }
