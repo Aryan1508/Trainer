@@ -4,4 +4,5 @@
 
 int main()
 {
+	Network net({ 768, 1 });
 }

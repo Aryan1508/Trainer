@@ -57,7 +57,7 @@ public:
 	{
 		errors.back() = (neurons.back() - target) * neurons.back().forEach(sigmoidPrime) * 2;
 
-		for (int layer = neurons.size() - 2; layer > 0; layer--)
+		for (std::size_t layer = neurons.size() - 2; layer > 0; layer--)
 		{
 			for (int neuron = 0; neuron < neurons[layer].totalRows(); neuron++)
 			{

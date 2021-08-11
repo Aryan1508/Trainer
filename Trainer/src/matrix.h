@@ -70,7 +70,7 @@ public:
 
 	int size() const
 	{
-		return data.size();
+		return static_cast<int>(data.size());
 	}
 private:
 	std::vector<T> data;
