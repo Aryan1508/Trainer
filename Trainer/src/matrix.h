@@ -78,9 +78,10 @@ namespace Trainer
 
 		void randomize(int inputs)
 		{
-			double a = 1 / sqrt((double)inputs);
-			std::mt19937 gen(74391987);
-			std::uniform_real_distribution distrib(-a, a);
+			double a = 2 / sqrt((double)inputs);
+
+			std::mt19937 gen(754232);
+			std::normal_distribution distrib(0.0, a);
 
 			*this = for_each([&](T const&) { return distrib(gen); });
 		}

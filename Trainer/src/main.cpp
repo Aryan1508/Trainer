@@ -55,7 +55,7 @@ int main()
 
 	StopWatch watch;
 	watch.go();
-	int i = 10;
+	int i = 1000;
 	while (i--)
 		std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
 	watch.stop();

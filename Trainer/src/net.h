@@ -29,7 +29,7 @@ namespace Trainer
 	}
 
 	constexpr int N_INPUT_NEURONS = 768;
-	constexpr int N_HIDDEN_NEURONS = 512;
+	constexpr int N_HIDDEN_NEURONS = 8;
 
 
 	template<int X1, int Y1, int X2, int Y2, typename Callable>
@@ -137,21 +137,22 @@ namespace Trainer
 
 		void apply()
 		{
+			double rate = 0.05;
 			for (int i = 0; i < hidden_neurons.totalRows(); i++)
 			{
 				for (int j = 0; j < N_INPUT_NEURONS; j++)
 				{
-					hidden_weights.get(i, j) -= 0.2 * hidden_weight_deltas.get(i, j);
+					hidden_weights.get(i, j) -= rate * hidden_weight_deltas.get(i, j);
 					hidden_weight_deltas.get(i, j) = 0;
 				}
 
-				hidden_biases.get(i) -= 0.2 * hidden_bias_deltas.get(i);
+				hidden_biases.get(i) -= rate * hidden_bias_deltas.get(i);
 				hidden_bias_deltas.get(i) = 0;
 
-				output_weights.get(i) -= 0.2 * output_weight_deltas.get(i);
+				output_weights.get(i) -= rate * output_weight_deltas.get(i);
 				output_weight_deltas.get(i) = 0;
 			}
-			output_bias.get(0) -= 0.2 * output_bias_deltas.get(0);
+			output_bias.get(0) -= rate * output_bias_deltas.get(0);
 			output_bias_deltas.get(0) = 0;
 		}
 
