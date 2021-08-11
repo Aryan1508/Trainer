@@ -75,22 +75,29 @@ namespace Trainer
 		Matrix<N_HIDDEN_NEURONS, 1> hidden_neurons;
 		Matrix<  1             , 1> output_neuron;
 		
-		Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS> hidden_weights;
-		Matrix<  1            , N_HIDDEN_NEURONS> output_weights;
+		Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS> hidden_weights, hidden_weight_deltas;
+		Matrix<  1            , N_HIDDEN_NEURONS> output_weights, output_weight_deltas;
 
-		Matrix<N_HIDDEN_NEURONS, 1> hidden_biases;
-		Matrix<  1             , 1> output_bias;
+		Matrix<N_HIDDEN_NEURONS, 1> hidden_biases, hidden_bias_deltas;
+		Matrix<  1             , 1> output_bias, output_bias_deltas;
 
 		Matrix<N_HIDDEN_NEURONS, 1> hidden_error;
 		double output_error;
 
+
 		Network()
 		{
 			hidden_weights.randomize(N_INPUT_NEURONS);
+			hidden_weight_deltas.set(0);
+
 			output_weights.randomize(N_HIDDEN_NEURONS);
+			output_weight_deltas.set(0);
 
 			hidden_biases.randomize(N_INPUT_NEURONS);
+			hidden_bias_deltas.set(0);
+
 			output_bias.randomize(N_HIDDEN_NEURONS);
+			output_bias_deltas.set(0);
 
 			hidden_neurons.set(0);
 			hidden_error.set(0);
@@ -115,16 +122,37 @@ namespace Trainer
 
 		void updateWeights(Matrix<N_INPUT_NEURONS, 1> const& sample)
 		{
-			double rate = 0.2;
 			for (int i = 0; i < hidden_neurons.totalRows(); i++)
 			{
 				for (int j = 0; j < sample.totalRows(); j++)
 				{
-					hidden_weights.get(i, j) -= rate * sample.get(j) * hidden_error.get(i);
+					hidden_weight_deltas.get(i, j) += sample.get(j) * hidden_error.get(i);
 				}
-				hidden_biases.get(i) -= rate * hidden_error.get(i);
-				output_weights.get(i) -= rate * output_error * hidden_error.get(i);
+
+				hidden_bias_deltas.get(i) += hidden_error.get(i);
+				output_weight_deltas.get(i) += output_error * hidden_error.get(i);
 			}
+			output_bias_deltas.get(0) += output_error;
+		}
+
+		void apply()
+		{
+			for (int i = 0; i < hidden_neurons.totalRows(); i++)
+			{
+				for (int j = 0; j < N_INPUT_NEURONS; j++)
+				{
+					hidden_weights.get(i, j) -= 0.2 * hidden_weight_deltas.get(i, j);
+					hidden_weight_deltas.get(i, j) = 0;
+				}
+
+				hidden_biases.get(i) -= 0.2 * hidden_bias_deltas.get(i);
+				hidden_bias_deltas.get(i) = 0;
+
+				output_weights.get(i) -= 0.2 * output_weight_deltas.get(i);
+				output_weight_deltas.get(i) = 0;
+			}
+			output_bias.get(0) -= 0.2 * output_bias_deltas.get(0);
+			output_bias_deltas.get(0) = 0;
 		}
 
 		void back_propagate(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices, double target)

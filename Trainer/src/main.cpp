@@ -41,6 +41,8 @@ double get_cost(Trainer::Network& net)
 	}
 	fil.close();
 
+	net.apply();
+
 	return cost;
 }
 
