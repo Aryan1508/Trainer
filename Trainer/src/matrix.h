@@ -3,6 +3,7 @@
 #include <array>
 #include <random>
 #include <cassert>
+#include <iostream>
 #include <algorithm>
 
 namespace Trainer
@@ -88,9 +89,25 @@ namespace Trainer
 		{
 			return static_cast<int>(data.size());
 		}
+
+		
 	private:
 		std::vector<double> data;
 	};
+
+	template<int X1, int X2>
+	std::ostream& operator<<(std::ostream& o, Matrix<X1, X2> const& mat)
+	{
+		for (int i = 0; i < mat.totalRows(); i++)
+		{
+			for (int j = 0; j < mat.totalCols(); j++)
+			{
+				o << mat.get(i, j) << ' ';
+			}
+			o << '\n';
+		}
+		return o;
+	}
 }
 
 template<int X1, int Y1> 
@@ -116,26 +133,6 @@ inline Trainer::Matrix<X1, Y1> operator-(Trainer::Matrix<X1, Y1> const& lhs, Tra
 	return out;
 }
 
-template<int X1, int Y1, int X2, int Y2>
-inline Trainer::Matrix<X1, Y2> operator*(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X2, Y2> const& rhs)
-{
-	assert(lhs.totalCols() == rhs.totalRows());
-
-	Trainer::Matrix<X1, Y2> out;
-
-	for (int i = 0; i < lhs.totalRows(); i++)
-	{
-		for (int j = 0; j < rhs.totalCols(); j++)
-		{
-			double sum = 0;
-			for (int k = 0; k < lhs.totalCols(); k++)
-				sum += lhs.get(i, k) * rhs.get(k, j);
-
-			out.get(i, j) = sum;
-		}
-	}
-	return out;
-}
 
 template<int X1, int Y1>
 inline Trainer::Matrix<X1, Y1> operator*(Trainer::Matrix<X1, Y1> const& lhs, double scalar)

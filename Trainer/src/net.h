@@ -28,13 +28,30 @@ namespace Trainer
 		return x > 0 ? 1 : 0;
 	}
 
-	constexpr int TOTAL_INPUTS = 
+	template<int X1, int Y1, int X2, int Y2, typename Callable>
+	inline void forward_propagate(
+		Trainer::Matrix<X1, Y1> const& weights, 
+		Trainer::Matrix<X2, Y2> const& neurons, 
+		Trainer::Matrix<X1, Y2> const& biases, 
+		Trainer::Matrix<X1, Y2>& result_neurons, Callable activation)
+	{
+		assert(weights.totalCols() == neurons.totalRows());
+
+		for (int i = 0; i < weights.totalRows(); i++)
+		{
+			double sum = 0;
+			for (int k = 0; k < weights.totalCols(); k++)
+				sum += weights.get(i, k) * neurons.get(k);
+
+			result_neurons.get(i) = activation(sum + biases.get(i));
+		}
+	}
 
 	class Network
 	{
 	public:
 		Matrix<512, 1> hidden_neurons;
-		double output_neuron;
+		Matrix<  1, 1> output_neuron;
 		
 		Matrix<512, 768> hidden_weights;
 		Matrix<  1, 512> output_weights;
@@ -43,7 +60,7 @@ namespace Trainer
 		Matrix<  1, 1> output_bias;
 
 		Matrix<512, 1> hidden_error;
-		double         output_error;
+		double output_error;
 
 		Network()
 		{
@@ -56,19 +73,19 @@ namespace Trainer
 			hidden_neurons.set(0);
 			hidden_error.set(0);
 			output_error = 0;
-			output_neuron = 0;
+			output_neuron.set(0);
 		}
 
 		double feed(Matrix<768, 1> const& sample)
 		{
-			hidden_neurons = (hidden_weights * sample + hidden_biases).for_each(relu);
-			output_neuron =  (output_weights * hidden_neurons + output_bias).for_each(sigmoid).get(0);
-			return output_neuron;
+			forward_propagate(hidden_weights, sample, hidden_biases, hidden_neurons, relu);
+			forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
+			return output_neuron.get(0);
 		}
 
 		void calculate_errors(double target)
 		{
-			output_error = (output_neuron - target) * sigmoid_prime(output_neuron) * 2;
+			output_error = (output_neuron.get(0) - target) * sigmoid_prime(output_neuron.get(0)) * 2;
 			
 			for (int i = 0; i < hidden_error.size(); i++)
 				hidden_error.get(i) = hidden_neurons.get(i) > 0 ? output_error * output_weights.get(i) : 0;

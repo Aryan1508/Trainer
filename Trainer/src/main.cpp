@@ -34,12 +34,15 @@ double get_cost(Trainer::Network& net)
 		auto sample = Trainer::position_to_input(position);
 
 	    net.back_propagate(sample, target);
-		cost += pow(target - net.output_neuron, 2);
+		cost += pow(target - net.output_neuron.get(0), 2);
 	}
 	fil.close();
 
 	return cost;
 }
+
+template<int X1, int X2>
+using M = Trainer::Matrix<X1, X2>;
 
 int main()
 {
