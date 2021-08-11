@@ -31,9 +31,12 @@ double get_cost(Trainer::Network& net)
 
 		position.set_fen(fen);
 
-		auto sample = Trainer::position_to_input(position);
+	    Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
+		std::vector<int> indices;
 
-	    net.back_propagate(sample, target);
+		Trainer::position_to_input(position, sample, indices);
+
+	    net.back_propagate(sample, indices, target);
 		cost += pow(target - net.output_neuron.get(0), 2);
 	}
 	fil.close();

@@ -28,6 +28,10 @@ namespace Trainer
 		return x > 0 ? 1 : 0;
 	}
 
+	constexpr int N_INPUT_NEURONS = 768;
+	constexpr int N_HIDDEN_NEURONS = 16;
+
+
 	template<int X1, int Y1, int X2, int Y2, typename Callable>
 	inline void forward_propagate(
 		Trainer::Matrix<X1, Y1> const& weights, 
@@ -47,9 +51,24 @@ namespace Trainer
 		}
 	}
 
-	constexpr int N_INPUT_NEURONS = 768;
-	constexpr int N_HIDDEN_NEURONS = 16;
+	inline void forward_propagate(
+		Trainer::Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS> const& weights,
+		std::vector<int>        const& indices,
+		Trainer::Matrix<N_HIDDEN_NEURONS, 1> const& biases,
+		Trainer::Matrix<N_HIDDEN_NEURONS, 1>& result_neurons)
+	{
+		assert(weights.totalCols() == neurons.totalRows());
 
+		for (int i = 0; i < weights.totalRows(); i++)
+		{
+			double sum = 0;
+			for (auto index : indices)
+				sum += weights.get(i, index);
+
+			result_neurons.get(i) = relu(sum + biases.get(i));
+		}
+	}
+	
 	class Network
 	{
 	public:
@@ -79,9 +98,9 @@ namespace Trainer
 			output_neuron.set(0);
 		}
 
-		double feed(Matrix<N_INPUT_NEURONS, 1> const& sample)
+		double feed(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices)
 		{
-			forward_propagate(hidden_weights, sample, hidden_biases, hidden_neurons, relu);
+			forward_propagate(hidden_weights, input_indices, hidden_biases, hidden_neurons);
 			forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 			return output_neuron.get(0);
 		}
@@ -108,14 +127,9 @@ namespace Trainer
 			}
 		}
 
-		double cost(Matrix<N_INPUT_NEURONS, 1> const& sample, double target)
+		void back_propagate(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices, double target)
 		{
-			return pow(feed(sample) - target, 2);
-		}
-
-		void back_propagate(Matrix<N_INPUT_NEURONS, 1> const& sample, double target)
-		{
-			feed(sample);
+			feed(sample, input_indices);
 			calculate_errors(target);
 			updateWeights(sample);
 		}
