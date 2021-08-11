@@ -47,6 +47,28 @@ namespace Trainer
 		}
 	}
 
+	template<int X1, int Y1, int X2, int Y2, typename Callable>
+	inline void forward_propagate_input(
+		Trainer::Matrix<X1, Y1> const& weights,
+		Trainer::Matrix<X2, Y2> const& neurons,
+		Trainer::Matrix<X1, Y2> const& biases,
+		Trainer::Matrix<X1, Y2>& result_neurons, Callable activation
+		)
+	{
+		assert(weights.totalCols() == neurons.totalRows());
+
+		for (int i = 0; i < weights.totalRows(); i++)
+		{
+			double sum = 0;
+			for (int j = 0; j < weights.totalCols(); j++)
+			{
+				if (neurons.get(j))
+					sum += weights.get(i, j);
+			}
+			result_neurons.get(i) = activation(sum + biases.get(i));
+		}
+	}
+
 	class Network
 	{
 	public:
@@ -78,7 +100,7 @@ namespace Trainer
 
 		double feed(Matrix<768, 1> const& sample)
 		{
-			forward_propagate(hidden_weights, sample, hidden_biases, hidden_neurons, relu);
+			forward_propagate_input(hidden_weights, sample, hidden_biases, hidden_neurons, relu);
 			forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 			return output_neuron.get(0);
 		}
