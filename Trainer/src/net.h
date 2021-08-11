@@ -36,21 +36,12 @@ public:
 			if (i > 0)
 			{
 				biases.push_back(Matrix(topology[i], 1));
+				biases.back().randomize();
 				weights.push_back(Matrix(topology[i], topology[i - 1]));
+				weights.back().randomize();
 			}
 		}
 		init();
-	}
-
-	void init()
-	{
-		std::mt19937 gen(4312987);
-		std::uniform_real_distribution distrib(-1.0f, 1.0f);
-
-		auto r = [&](double) { return distrib(gen); };
-
-		for (auto& weight : weights) weight.randomize();
-		for (auto& bias : biases)    bias.randomize();
 	}
 
 	Matrix const& feed(Matrix const& sample)
