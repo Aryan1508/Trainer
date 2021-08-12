@@ -89,7 +89,6 @@ namespace Trainer
 		Matrix<N_HIDDEN_NEURONS, 1> hidden_error;
 		float output_error;
 
-
 		Network()
 		{
 			hidden_weights.randomize(N_INPUT_NEURONS);
@@ -110,7 +109,7 @@ namespace Trainer
 			output_neuron.set(0);
 		}
 
-		float feed(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices)
+		float feed(std::vector<int> const& input_indices)
 		{
 			forward_propagate(hidden_weights, input_indices, hidden_biases, hidden_neurons);
 			forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
@@ -142,7 +141,7 @@ namespace Trainer
 
 		void apply()
 		{
-			float rate = 0.05f;
+			float rate = 0.01f;
 			for (int i = 0; i < hidden_neurons.total_rows(); i++)
 			{
 				for (int j = 0; j < N_INPUT_NEURONS; j++)
@@ -163,7 +162,7 @@ namespace Trainer
 
 		void back_propagate(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices, float target)
 		{
-			feed(sample, input_indices);
+			feed(input_indices);
 			calculate_errors(target);
 			updateWeights(sample);
 		}

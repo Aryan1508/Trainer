@@ -32,6 +32,28 @@ void load_positions(std::vector<Position>& positions)
 	fil.close();
 }
 
+void fit(Trainer::Network& net, std::vector<Position>& positions)
+{
+    double cost = 0;
+
+    int i = 0;
+
+    for (auto const& position : positions)
+	{
+        i++;
+
+	    Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
+		std::vector<int> indices;
+
+		Trainer::position_to_input(position, sample, indices);
+
+	    net.back_propagate(sample, indices, position.result);
+		cost += pow(position.result - net.output_neuron.get(0), 2);
+	}
+    net.apply();
+    std::cout << "Cost: " << cost << '\n';            
+}
+
 double get_cost(Trainer::Network& net, std::vector<Position>& positions)
 {
 	double cost = 0;
@@ -58,32 +80,9 @@ int main()
 {
 	Trainer::Network* net = new Trainer::Network;
 
-	std::vector<Position> positions;
-	load_positions(positions);
+    std::vector<Position> positions;
+    load_positions(positions);
 
-	StopWatch watch;
-	watch.go();
-
-	for (int i = 0; i < 200000; i++)
-	{
-		Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
-		std::vector<int> indices;
-
-		Trainer::position_to_input(positions[0], sample, indices);
-		net->feed(sample, indices);
-	}
-
-	watch.stop();
-
-	std::cout << watch.elapsed_time().count() << '\n';
-
-	watch.reset();
-	watch.go();
-	int i = 5;
-	while (i--)
-		std::cout << "Cost: " << get_cost(*net, positions) << '\n';
-
-	watch.stop();
-
-	std::cout << watch.elapsed_time().count() << '\n';
+    while(1)
+        fit(*net, positions);
 }
