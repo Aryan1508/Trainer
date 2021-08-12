@@ -32,8 +32,12 @@ namespace Trainer
 			else                                        position.result = 0.5;
 
 			positions.push_back(position);
+
+			if (positions.size() % 4096 == 0)
+				std::cerr << "\rLoading positions [" << positions.size() << "]" << std::flush;
 		}
 		fil.close();
+		std::cout << std::endl;
 
 		return positions;
 	}

@@ -128,7 +128,7 @@ namespace Trainer
 		auto apply_gradient =
 			[](float& value, float& gradient)
 			{
-				value -= 0.01 * gradient;
+				value -= 0.05f * gradient;
 				gradient = 0;
 			};
 
