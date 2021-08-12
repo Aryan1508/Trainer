@@ -1,36 +1,6 @@
 #include "net.h"
-#include <iostream>
-#include <iomanip>
-#include "position.h"
+#include "reader.h"
 #include "mappings.h"
-#include <fstream>
-#include "stopwatch.h"
-
-#define NPOSITIONS 5000
-
-void load_positions(std::vector<Position>& positions)
-{
-	positions.reserve(NPOSITIONS);
-
-	int i = 0;
-	Position position;
-	std::ifstream fil("C:/tuning/shuffled_depth_6");
-
-	for (std::string line; std::getline(fil, line);)
-	{
-		if (++i >= NPOSITIONS)
-			break;
-
-		position.set_fen(line.substr(0, line.find("[") - 1));
-
-		if (line.find("[1.0]") != line.npos)        position.result = 1.0;
-		else if (line.find("[0.0]") != line.npos)   position.result = 0.0;
-		else                                        position.result = 0.5;
-
-		positions.push_back(position);
-	}
-	fil.close();
-}
 
 void fit(Trainer::Network& net, std::vector<Position>& positions)
 {
@@ -78,10 +48,9 @@ using M = Trainer::Matrix<X1, X2>;
 
 int main()
 {
-	Trainer::Network* net = new Trainer::Network;
+	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
 
-    std::vector<Position> positions;
-    load_positions(positions);
+	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6", 5000);
 
     while(1)
         fit(*net, positions);
