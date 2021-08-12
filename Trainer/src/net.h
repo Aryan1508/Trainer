@@ -35,8 +35,7 @@ namespace Trainer
 		void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
 		{
 			feed(input_indices);
-			calculate_errors(target);
-			calculate_gradients(sample);
+			calculate_errors(sample, target);
 		}
 
 		float get_output() const
@@ -44,18 +43,13 @@ namespace Trainer
 			return output_neuron.get(0);
 		}
 	private:
-		void calculate_errors(float target);
-
-		void calculate_gradients(InputVector const& sample);
-
+		void calculate_errors(InputVector const& sample, float target);
 	private:
-		HiddenVector  hidden_errors;
 		HiddenVector  hidden_biases;
 		HiddenVector  hidden_neurons;
 		HiddenVector  hidden_bias_deltas;
 
 		OutputVector output_bias;
-		OutputVector output_error;
 		OutputVector output_neuron;
 		OutputVector output_bias_deltas;
 

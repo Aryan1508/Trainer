@@ -31,9 +31,7 @@ namespace Trainer
 		output_bias   .randomize(HiddenVector::size());
 
 		hidden_neurons      .set(0);
-		hidden_errors       .set(0);
 		output_neuron       .set(0);
-		output_error        .set(0);
 		output_bias_deltas  .set(0);
 		hidden_bias_deltas  .set(0);
 		output_weight_deltas.set(0);
@@ -109,19 +107,27 @@ namespace Trainer
 		forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 	}
 
-	void Network::calculate_gradients(InputVector const& sample)
+	void Network::calculate_errors(InputVector const& sample, float target)
 	{
-		for (int i = 0; i < hidden_neurons.total_rows(); i++)
-		{
-			for (int j = 0; j < sample.total_rows(); j++)
-			{
-				hidden_weight_deltas.get(i, j) += sample.get(j) * hidden_errors.get(i);
-			}
+		float error = (output_neuron.get(0) - target) * sigmoid_prime(output_neuron.get(0)) * 2;
 
-			hidden_bias_deltas.get(i)   += hidden_errors.get(i);
-			output_weight_deltas.get(i) += hidden_neurons.get(i) * output_error.get(0);
+		for (int i = 0; i < hidden_neurons.size(); i++)
+		{
+			if (hidden_neurons.get(i) > 0)
+			{
+				float gradient = error * output_weights.get(i);
+
+				for (int j = 0; j < sample.total_rows(); j++)
+				{
+					hidden_weight_deltas.get(i, j) += gradient * sample.get(j);
+				}
+
+				hidden_bias_deltas.get(i)   += gradient;
+				output_weight_deltas.get(i) += gradient * error;
+			}
 		}
-		output_bias_deltas.get(0) += output_error.get(0);
+
+		output_bias_deltas.get(0) += error;
 	}
 
 	void Network::apply_gradients()
@@ -144,13 +150,5 @@ namespace Trainer
 			apply_gradient(output_weights.get(i), output_weight_deltas.get(i));
 		}
 		apply_gradient(output_bias.get(0), output_bias_deltas.get(0));
-	}
-
-	void Network::calculate_errors(float target)
-	{
-		output_error.get(0) = (output_neuron.get(0) - target) * sigmoid_prime(output_neuron.get(0)) * 2;
-
-		for (int i = 0; i < hidden_errors.size(); i++)
-			hidden_errors.get(i) = hidden_neurons.get(i) > 0 ? output_error.get(0) * output_weights.get(i) : 0;
 	}
 }
