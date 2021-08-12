@@ -121,9 +121,8 @@ namespace Trainer
 				{
 					hidden_weight_deltas.get(i, j) += gradient * sample.get(j);
 				}
-
+				output_weight_deltas.get(i) += hidden_neurons.get(i) * error;
 				hidden_bias_deltas.get(i)   += gradient;
-				output_weight_deltas.get(i) += gradient * error;
 			}
 		}
 
@@ -135,7 +134,7 @@ namespace Trainer
 		auto apply_gradient =
         [](float& value, float& gradient)
         {
-            value -= gradient / 128;
+            value -= gradient / 256;
             gradient = 0.0f;
         };
 

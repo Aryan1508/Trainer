@@ -12,7 +12,7 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 	long double cost = 0;
     for (auto const& position : positions)
 	{
-        if (++i % 16 == 0)
+        if (++i % 256 == 0)
         {
             net.apply_gradients();
 			double eps = i / (double)watch.elapsed_time().count() * 1000;
