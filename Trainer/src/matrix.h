@@ -65,20 +65,6 @@ namespace Trainer
 		std::array<float, X * Y> data;
 	};
 
-	template<int X1, int X2>
-	std::ostream& operator<<(std::ostream& o, Matrix<X1, X2> const& mat)
-	{
-		for (int i = 0; i < mat.total_rows(); i++)
-		{
-			for (int j = 0; j < mat.total_cols(); j++)
-			{
-				o << mat.get(i, j) << ' ';
-			}
-			o << '\n';
-		}
-		return o;
-	}
-
 	template<int X, int Y>
 	using RowMajorMatrix = Matrix<X, Y, true>;
 
