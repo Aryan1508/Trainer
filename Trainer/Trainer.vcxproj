@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\bitboard.h" />
     <ClInclude Include="src\bitmask.h" />
     <ClInclude Include="src\mappings.h" />
     <ClInclude Include="src\matrix.h" />

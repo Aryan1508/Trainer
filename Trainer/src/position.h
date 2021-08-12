@@ -1,6 +1,5 @@
 #pragma once
 #include "piece.h"
-#include "bitboard.h"
 
 #include <array>
 #include <string_view>

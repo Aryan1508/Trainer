@@ -16,7 +16,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "position.h"
-#include "bitboard.h"
+#include "Square.h"
 #include <sstream>
 #include <vector>
 

@@ -39,12 +39,12 @@ namespace Trainer
 			return data[i];
 		}
 
-		constexpr int totalRows() const
+		constexpr int total_rows() const
 		{
 			return X;
 		}
 
-		constexpr int totalCols() const
+		constexpr int total_cols() const
 		{
 			return Y;
 		}
@@ -56,18 +56,6 @@ namespace Trainer
 
 			for (int i = 0; i < data.size(); i++)
 				out.get(i) = F(get(i));
-			return out;
-		}
-
-		Matrix<Y, X> transpose() const
-		{
-			Matrix<Y, X> out;
-
-			for (int i = 0; i < X; i++)
-			{
-				for (int j = 0; j < Y; j++)
-					out.get(j, i) = get(i, j);
-			}
 			return out;
 		}
 
@@ -97,9 +85,9 @@ namespace Trainer
 	template<int X1, int X2>
 	std::ostream& operator<<(std::ostream& o, Matrix<X1, X2> const& mat)
 	{
-		for (int i = 0; i < mat.totalRows(); i++)
+		for (int i = 0; i < mat.total_rows(); i++)
 		{
-			for (int j = 0; j < mat.totalCols(); j++)
+			for (int j = 0; j < mat.total_cols(); j++)
 			{
 				o << mat.get(i, j) << ' ';
 			}
@@ -112,7 +100,7 @@ namespace Trainer
 template<int X1, int Y1> 
 inline Trainer::Matrix<X1, Y1> operator+(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X1, Y1> const& rhs)
 {
-	assert(lhs.totalRows() == rhs.totalRows() && lhs.totalCols() == rhs.totalCols());
+	assert(lhs.total_rows() == rhs.total_rows() && lhs.total_cols() == rhs.total_cols());
 	Trainer::Matrix<X1, Y1> out;
 
 	for (int i = 0; i < lhs.size(); i++)

@@ -6,7 +6,7 @@
 #include <fstream>
 #include "stopwatch.h"
 
-#define NPOSITIONS 50000
+#define NPOSITIONS 5000
 
 void load_positions(std::vector<Position>& positions)
 {
@@ -32,9 +32,9 @@ void load_positions(std::vector<Position>& positions)
 	fil.close();
 }
 
-float get_cost(Trainer::Network& net, std::vector<Position>& positions)
+double get_cost(Trainer::Network& net, std::vector<Position>& positions)
 {
-	float cost = 0;
+	double cost = 0;
 
 	for (auto const& position : positions)
 	{
@@ -51,6 +51,9 @@ float get_cost(Trainer::Network& net, std::vector<Position>& positions)
 	return cost;
 }
 
+template<int X1, int X2>
+using M = Trainer::Matrix<X1, X2>;
+
 int main()
 {
 	Trainer::Network* net = new Trainer::Network;
@@ -61,7 +64,7 @@ int main()
 	StopWatch watch;
 	watch.go();
 
-	for (int i = 0; i < 1000000; i++)
+	for (int i = 0; i < 200000; i++)
 	{
 		Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
 		std::vector<int> indices;

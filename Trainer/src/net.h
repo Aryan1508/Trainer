@@ -39,12 +39,12 @@ namespace Trainer
 		Trainer::Matrix<X1, Y2> const& biases, 
 		Trainer::Matrix<X1, Y2>& result_neurons, Callable activation)
 	{
-		assert(weights.totalCols() == neurons.totalRows());
+		assert(weights.total_cols() == neurons.total_rows());
 
-		for (int i = 0; i < weights.totalRows(); i++)
+		for (int i = 0; i < weights.total_rows(); i++)
 		{
 			float sum = 0;
-			for (int k = 0; k < weights.totalCols(); k++)
+			for (int k = 0; k < weights.total_cols(); k++)
 				sum += weights.get(i, k) * neurons.get(k);
 
 			result_neurons.get(i) = activation(sum + biases.get(i));
@@ -61,13 +61,13 @@ namespace Trainer
 
 		for (auto index : indices)
 		{
-			for (int i = 0; i < weights.totalRows(); i++)
+			for (int i = 0; i < weights.total_rows(); i++)
 			{
 				result_neurons.get(i) += weights.get(i, index);
 			}
 		}
 
-		for (int i = 0; i < weights.totalRows(); i++)
+		for (int i = 0; i < weights.total_rows(); i++)
 		{
 			result_neurons.get(i) = relu(result_neurons.get(i) + biases.get(i));
 		}
@@ -126,9 +126,9 @@ namespace Trainer
 
 		void updateWeights(Matrix<N_INPUT_NEURONS, 1> const& sample)
 		{
-			for (int i = 0; i < hidden_neurons.totalRows(); i++)
+			for (int i = 0; i < hidden_neurons.total_rows(); i++)
 			{
-				for (int j = 0; j < sample.totalRows(); j++)
+				for (int j = 0; j < sample.total_rows(); j++)
 				{
 					hidden_weight_deltas.get(i, j) += sample.get(j) * hidden_error.get(i);
 				}
@@ -142,7 +142,7 @@ namespace Trainer
 		void apply()
 		{
 			float rate = 0.05f;
-			for (int i = 0; i < hidden_neurons.totalRows(); i++)
+			for (int i = 0; i < hidden_neurons.total_rows(); i++)
 			{
 				for (int j = 0; j < N_INPUT_NEURONS; j++)
 				{
