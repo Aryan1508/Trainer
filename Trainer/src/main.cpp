@@ -43,9 +43,6 @@ double get_cost(Trainer::Network& net, std::vector<Position>& positions)
 	return cost;
 }
 
-template<int X1, int X2>
-using M = Trainer::Matrix<X1, X2>;
-
 int main()
 {
 	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
