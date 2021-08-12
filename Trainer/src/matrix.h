@@ -12,7 +12,7 @@ namespace Trainer
 	class Matrix
 	{
 	public:
-		using T = double;
+		using T = float;
 
 		Matrix()
 		{
@@ -78,10 +78,10 @@ namespace Trainer
 
 		void randomize(int inputs)
 		{
-			double a = 2 / sqrt((double)inputs);
+			float a = 2 / sqrtf((float)inputs);
 
 			std::mt19937 gen(754232);
-			std::normal_distribution distrib(0.0, a);
+			std::normal_distribution distrib(0.0f, a);
 
 			*this = for_each([&](T const&) { return distrib(gen); });
 		}
@@ -90,10 +90,8 @@ namespace Trainer
 		{
 			return static_cast<int>(data.size());
 		}
-
-		
 	private:
-		std::vector<double> data;
+		std::vector<float> data;
 	};
 
 	template<int X1, int X2>
@@ -136,7 +134,7 @@ inline Trainer::Matrix<X1, Y1> operator-(Trainer::Matrix<X1, Y1> const& lhs, Tra
 
 
 template<int X1, int Y1>
-inline Trainer::Matrix<X1, Y1> operator*(Trainer::Matrix<X1, Y1> const& lhs, double scalar)
+inline Trainer::Matrix<X1, Y1> operator*(Trainer::Matrix<X1, Y1> const& lhs, float scalar)
 {
-	return lhs.for_each([=](double x) { return x * scalar; });
+	return lhs.for_each([=](float x) { return x * scalar; });
 }

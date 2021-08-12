@@ -32,9 +32,9 @@ void load_positions(std::vector<Position>& positions)
 	fil.close();
 }
 
-double get_cost(Trainer::Network& net, std::vector<Position>& positions)
+float get_cost(Trainer::Network& net, std::vector<Position>& positions)
 {
-	double cost = 0;
+	float cost = 0;
 
 	for (auto const& position : positions)
 	{
@@ -51,9 +51,6 @@ double get_cost(Trainer::Network& net, std::vector<Position>& positions)
 	return cost;
 }
 
-template<int X1, int X2>
-using M = Trainer::Matrix<X1, X2>;
-
 int main()
 {
 	Trainer::Network* net = new Trainer::Network;
@@ -63,9 +60,16 @@ int main()
 
 	StopWatch watch;
 	watch.go();
-	int i = 3;
-	while (i--)
-		std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net, positions) << '\n';
+
+	for (int i = 0; i < 1000000; i++)
+	{
+		Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
+		std::vector<int> indices;
+
+		Trainer::position_to_input(positions[0], sample, indices);
+		net->feed(sample, indices);
+	}
+
 	watch.stop();
 
 	std::cout << watch.elapsed_time().count() << '\n';

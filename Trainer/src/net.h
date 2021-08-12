@@ -8,24 +8,24 @@
 
 namespace Trainer
 {
-	double sigmoid(double x)
+	float sigmoid(float x)
 	{
-		return 1 / (1 + exp(-x * (2.5 / 400.0f)));
+		return 1.0f / (1.0f + expf(-x * (2.5f / 400.0f)));
 	}
 
-	double sigmoid_prime(double x)
+	float sigmoid_prime(float x)
 	{
-		return x * (1 - x) * (2.5 / 400.0f);
+		return x * (1.0f - x) * (2.5f / 400.0f);
 	}
 
-	double relu(double x)
+	float relu(float x)
 	{
-		return std::max<double>(x, 0);
+		return std::max<float>(x, 0.0f);
 	}
 
-	double reluD(double x)
+	float reluD(float x)
 	{
-		return x > 0 ? 1 : 0;
+		return x > 0.0f ? 1.0f : 0.0f;
 	}
 
 	constexpr int N_INPUT_NEURONS = 768;
@@ -43,7 +43,7 @@ namespace Trainer
 
 		for (int i = 0; i < weights.totalRows(); i++)
 		{
-			double sum = 0;
+			float sum = 0;
 			for (int k = 0; k < weights.totalCols(); k++)
 				sum += weights.get(i, k) * neurons.get(k);
 
@@ -57,14 +57,19 @@ namespace Trainer
 		Trainer::Matrix<N_HIDDEN_NEURONS, 1> const& biases,
 		Trainer::Matrix<N_HIDDEN_NEURONS, 1>& result_neurons)
 	{
+		result_neurons.set(0);
+
+		for (auto index : indices)
+		{
+			for (int i = 0; i < weights.totalRows(); i++)
+			{
+				result_neurons.get(i) += weights.get(i, index);
+			}
+		}
 
 		for (int i = 0; i < weights.totalRows(); i++)
 		{
-			double sum = 0;
-			for (auto index : indices)
-				sum += weights.get(i, index);
-
-			result_neurons.get(i) = relu(sum + biases.get(i));
+			result_neurons.get(i) = relu(result_neurons.get(i) + biases.get(i));
 		}
 	}
 	
@@ -81,7 +86,7 @@ namespace Trainer
 		Matrix<  1             , 1> output_bias, output_bias_deltas;
 
 		Matrix<N_HIDDEN_NEURONS, 1> hidden_error;
-		double output_error;
+		float output_error;
 
 
 		Network()
@@ -104,14 +109,14 @@ namespace Trainer
 			output_neuron.set(0);
 		}
 
-		double feed(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices)
+		float feed(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices)
 		{
 			forward_propagate(hidden_weights, input_indices, hidden_biases, hidden_neurons);
 			forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 			return output_neuron.get(0);
 		}
 
-		void calculate_errors(double target)
+		void calculate_errors(float target)
 		{
 			output_error = (output_neuron.get(0) - target) * sigmoid_prime(output_neuron.get(0)) * 2;
 			
@@ -136,7 +141,7 @@ namespace Trainer
 
 		void apply()
 		{
-			double rate = 0.05;
+			float rate = 0.05f;
 			for (int i = 0; i < hidden_neurons.totalRows(); i++)
 			{
 				for (int j = 0; j < N_INPUT_NEURONS; j++)
@@ -155,7 +160,7 @@ namespace Trainer
 			output_bias_deltas.get(0) = 0;
 		}
 
-		void back_propagate(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices, double target)
+		void back_propagate(Matrix<N_INPUT_NEURONS, 1> const& sample, std::vector<int> const& input_indices, float target)
 		{
 			feed(sample, input_indices);
 			calculate_errors(target);

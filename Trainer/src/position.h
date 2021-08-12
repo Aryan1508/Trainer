@@ -9,7 +9,7 @@ class Position
 {
 public:
     std::array<Piece, 64> pieces; 
-    double result = 0;
+    float result = 0;
     
     Position();
 
