@@ -71,23 +71,25 @@ namespace Trainer
 
 	void Network::apply_gradients()
 	{
+		auto apply_gradient =
+			[](float& value, float& gradient)
+			{
+				value -= 0.01 * gradient;
+				gradient = 0;
+			};
+
 		float rate = 0.01f;
 		for (int i = 0; i < hidden_neurons.total_rows(); i++)
 		{
 			for (int j = 0; j < InputVector::size(); j++)
 			{
-				hidden_weights.get(i, j) -= rate * hidden_weight_deltas.get(i, j);
-				hidden_weight_deltas.get(i, j) = 0;
+				apply_gradient(hidden_weights.get(i, j), hidden_weight_deltas.get(i, j));
 			}
 
-			hidden_biases.get(i) -= rate * hidden_bias_deltas.get(i);
-			hidden_bias_deltas.get(i) = 0;
-
-			output_weights.get(i) -= rate * output_weight_deltas.get(i);
-			output_weight_deltas.get(i) = 0;
+			apply_gradient(hidden_biases .get(i), hidden_bias_deltas  .get(i));
+			apply_gradient(output_weights.get(i), output_weight_deltas.get(i));
 		}
-		output_bias.get(0) -= rate * output_bias_deltas.get(0);
-		output_bias_deltas.get(0) = 0;
+		apply_gradient(output_bias.get(0), output_bias_deltas.get(0));
 	}
 
 	void Network::calculate_errors(float target)
