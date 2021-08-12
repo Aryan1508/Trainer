@@ -1,18 +1,22 @@
 #include "net.h"
 #include "reader.h"
 #include "mappings.h"
+#include "stopwatch.h"
 
 void fit(Trainer::Network& net, std::vector<Position>& positions)
 {
     int i = 0;
+	StopWatch watch;
+	watch.go();
 
 	long double cost = 0;
     for (auto const& position : positions)
 	{
-        if (++i % 256 == 0)
+        if (++i % 16 == 0)
         {
             net.apply_gradients();
-            std::cout << "\rEvaluated [ " << i << " ]";
+			double eps = i / (double)watch.elapsed_time().count() * 1000;
+            std::cout << "\rEvaluated [ " << i << " ]" << "EPS [ " << eps << " ] ";
         }
 
 	    Trainer::InputVector sample;
@@ -30,12 +34,13 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 int main()
 {
 	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
+    net->load_network("test.nn");
 
-	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6", 5000000);
+	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6", 200000);
 
 	for (int i = 0; i < 100000; i++)
 	{
 		fit(*net, positions);
-		net->save_network("test.nn");
+		 //net->save_network("test.nn");
 	}
 }
