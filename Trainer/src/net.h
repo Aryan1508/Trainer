@@ -124,7 +124,7 @@ namespace Trainer
 				hidden_error.get(i) = hidden_neurons.get(i) > 0 ? output_error * output_weights.get(i) : 0;
 		}
 
-		void updateWeights(Matrix<N_INPUT_NEURONS, 1> const& sample)
+		void calculate_gradients(Matrix<N_INPUT_NEURONS, 1> const& sample)
 		{
 			for (int i = 0; i < hidden_neurons.total_rows(); i++)
 			{
@@ -133,8 +133,8 @@ namespace Trainer
 					hidden_weight_deltas.get(i, j) += sample.get(j) * hidden_error.get(i);
 				}
 
-				hidden_bias_deltas.get(i) += hidden_error.get(i);
-				output_weight_deltas.get(i) += output_error * hidden_neurons.get(i);
+				hidden_bias_deltas  .get(i) += hidden_error  .get(i);
+				output_weight_deltas.get(i) += hidden_neurons.get(i) * output_error;
 			}
 			output_bias_deltas.get(0) += output_error;
 		}
@@ -164,7 +164,7 @@ namespace Trainer
 		{
 			feed(input_indices);
 			calculate_errors(target);
-			updateWeights(sample);
+			calculate_gradients(sample, input_indices, target);
 		}
 	};
 }
