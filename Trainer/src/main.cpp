@@ -24,25 +24,6 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
     std::cout << "Cost: " << cost << '\n';            
 }
 
-double get_cost(Trainer::Network& net, std::vector<Position>& positions)
-{
-	double cost = 0;
-
-	for (auto const& position : positions)
-	{
-	    Trainer::InputVector sample;
-		std::vector<int> indices;
-
-		Trainer::position_to_input(position, sample, indices);
-
-	    net.back_propagate(sample, indices, position.result);
-		cost += pow(position.result - net.get_output(), 2);
-	}
-	net.apply_gradients();
-
-	return cost;
-}
-
 int main()
 {
 	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
