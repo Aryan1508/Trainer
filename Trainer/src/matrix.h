@@ -49,16 +49,6 @@ namespace Trainer
 			return Y;
 		}
 
-		template<typename Callable>
-		Matrix<X, Y> for_each(Callable F) const
-		{
-			Matrix<X, Y> out;
-
-			for (int i = 0; i < data.size(); i++)
-				out.get(i) = F(get(i));
-			return out;
-		}
-
 		void set(T const& val)
 		{
 			std::fill(data.begin(), data.end(), val);
@@ -71,7 +61,7 @@ namespace Trainer
 			std::mt19937 gen(754232);
 			std::normal_distribution distrib(0.0f, a);
 
-			*this = for_each([&](T const&) { return distrib(gen); });
+			for (auto& val : data) val = distrib(gen);
 		}
 
 		int size() const
@@ -95,34 +85,4 @@ namespace Trainer
 		}
 		return o;
 	}
-}
-
-template<int X1, int Y1> 
-inline Trainer::Matrix<X1, Y1> operator+(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X1, Y1> const& rhs)
-{
-	assert(lhs.total_rows() == rhs.total_rows() && lhs.total_cols() == rhs.total_cols());
-	Trainer::Matrix<X1, Y1> out;
-
-	for (int i = 0; i < lhs.size(); i++)
-		out.get(i) = lhs.get(i) + rhs.get(i);
-
-	return out;
-}
-
-template<int X1, int Y1>
-inline Trainer::Matrix<X1, Y1> operator-(Trainer::Matrix<X1, Y1> const& lhs, Trainer::Matrix<X1, Y1> const& rhs)
-{
-	Trainer::Matrix<X1, Y1> out;
-
-	for (int i = 0; i < lhs.size(); i++)
-		out.get(i) = lhs.get(i) - rhs.get(i);
-
-	return out;
-}
-
-
-template<int X1, int Y1>
-inline Trainer::Matrix<X1, Y1> operator*(Trainer::Matrix<X1, Y1> const& lhs, float scalar)
-{
-	return lhs.for_each([=](float x) { return x * scalar; });
 }
