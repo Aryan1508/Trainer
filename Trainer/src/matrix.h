@@ -12,36 +12,24 @@ namespace Trainer
 	class Matrix
 	{
 	public:
-		using T = float;
-
 		Matrix() = default;
 
-		/*T& get(int row, int col)
-		{
-			return data[col * X + row];
-		}
-
-		T const& get(int row, int col) const
-		{
-			return data[col * X + row];
-		}*/
-
-		T& get(int row, int col)
+		float& get(int row, int col)
 		{
 			return rowmajor ? data[col * X + row] : data[row * Y + col];
 		}
 
-		T const& get(int row, int col) const
+		float get(int row, int col) const
 		{
 			return rowmajor ? data[col * X + row] : data[row * Y + col];
 		}
 
-		T& get(int i)
+		float& get(int i)
 		{
 			return data[i];
 		}
 
-		T const& get(int i) const
+		float get(int i) const
 		{
 			return data[i];
 		}
@@ -56,7 +44,7 @@ namespace Trainer
 			return Y;
 		}
 
-		void set(T const& val)
+		void set(float val)
 		{
 			std::fill(data.begin(), data.end(), val);
 		}
