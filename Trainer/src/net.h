@@ -29,7 +29,7 @@ namespace Trainer
 	}
 
 	constexpr int N_INPUT_NEURONS = 768;
-	constexpr int N_HIDDEN_NEURONS = 8;
+	constexpr int N_HIDDEN_NEURONS = 512;
 
 
 	template<int X1, int Y1, int X2, int Y2, typename Callable>

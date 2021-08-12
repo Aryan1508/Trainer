@@ -6,11 +6,11 @@
 #include <fstream>
 #include "stopwatch.h"
 
-#define NPOSITIONS 5000
+#define NPOSITIONS 50000
 
-double get_cost(Trainer::Network& net)
+void load_positions(std::vector<Position>& positions)
 {
-	double cost = 0;
+	positions.reserve(NPOSITIONS);
 
 	int i = 0;
 	Position position;
@@ -21,26 +21,31 @@ double get_cost(Trainer::Network& net)
 		if (++i >= NPOSITIONS)
 			break;
 
-		double target = 0;
+		position.set_fen(line.substr(0, line.find("[") - 1));
 
-		std::string fen = line.substr(0, line.find("[") - 1);
+		if (line.find("[1.0]") != line.npos)        position.result = 1.0;
+		else if (line.find("[0.0]") != line.npos)   position.result = 0.0;
+		else                                        position.result = 0.5;
 
-		if (line.find("[1.0]") != line.npos)        target = 1.0;
-		else if (line.find("[0.0]") != line.npos)   target = 0.0;
-		else                                        target = 0.5;
+		positions.push_back(position);
+	}
+	fil.close();
+}
 
-		position.set_fen(fen);
+double get_cost(Trainer::Network& net, std::vector<Position>& positions)
+{
+	double cost = 0;
 
+	for (auto const& position : positions)
+	{
 	    Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
 		std::vector<int> indices;
 
 		Trainer::position_to_input(position, sample, indices);
 
-	    net.back_propagate(sample, indices, target);
-		cost += pow(target - net.output_neuron.get(0), 2);
+	    net.back_propagate(sample, indices, position.result);
+		cost += pow(position.result - net.output_neuron.get(0), 2);
 	}
-	fil.close();
-
 	net.apply();
 
 	return cost;
@@ -53,11 +58,14 @@ int main()
 {
 	Trainer::Network* net = new Trainer::Network;
 
+	std::vector<Position> positions;
+	load_positions(positions);
+
 	StopWatch watch;
 	watch.go();
-	int i = 1000;
+	int i = 3;
 	while (i--)
-		std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net) << '\n';
+		std::cout << "Cost over " << NPOSITIONS << " positions: " << std::fixed << std::setprecision(8) << get_cost(*net, positions) << '\n';
 	watch.stop();
 
 	std::cout << watch.elapsed_time().count() << '\n';

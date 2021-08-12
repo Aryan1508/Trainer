@@ -7,9 +7,10 @@
 
 class Position
 {
-private:
-    std::array<Piece, 64> pieces; 
 public:
+    std::array<Piece, 64> pieces; 
+    double result = 0;
+    
     Position();
 
     void set_fen(std::string_view);
