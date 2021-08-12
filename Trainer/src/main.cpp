@@ -42,15 +42,15 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 	{
         i++;
 
-	    Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
+	    Trainer::InputVector sample;
 		std::vector<int> indices;
 
 		Trainer::position_to_input(position, sample, indices);
 
 	    net.back_propagate(sample, indices, position.result);
-		cost += pow(position.result - net.output_neuron.get(0), 2);
+		cost += pow(position.result - net.get_output(), 2);
 	}
-    net.apply();
+    net.apply_gradients();
     std::cout << "Cost: " << cost << '\n';            
 }
 
@@ -60,15 +60,15 @@ double get_cost(Trainer::Network& net, std::vector<Position>& positions)
 
 	for (auto const& position : positions)
 	{
-	    Trainer::Matrix<Trainer::N_INPUT_NEURONS, 1> sample;
+	    Trainer::InputVector sample;
 		std::vector<int> indices;
 
 		Trainer::position_to_input(position, sample, indices);
 
 	    net.back_propagate(sample, indices, position.result);
-		cost += pow(position.result - net.output_neuron.get(0), 2);
+		cost += pow(position.result - net.get_output(), 2);
 	}
-	net.apply();
+	net.apply_gradients();
 
 	return cost;
 }

@@ -33,16 +33,6 @@ namespace Trainer
 			return data[i];
 		}
 
-		constexpr int total_rows() const
-		{
-			return X;
-		}
-
-		constexpr int total_cols() const
-		{
-			return Y;
-		}
-
 		void set(float val)
 		{
 			std::fill(data.begin(), data.end(), val);
@@ -58,9 +48,18 @@ namespace Trainer
 			for (auto& val : data) val = distrib(gen);
 		}
 
-		int size() const
+		static constexpr int total_rows() 
 		{
-			return static_cast<int>(data.size());
+			return X;
+		}
+
+		static constexpr int total_cols() 
+		{
+			return Y;
+		}
+		static constexpr int size() 
+		{
+			return static_cast<int>(X * Y);
 		}
 	private:
 		std::array<float, X * Y> data;
@@ -79,4 +78,10 @@ namespace Trainer
 		}
 		return o;
 	}
+
+	template<int X, int Y>
+	using RowMajorMatrix = Matrix<X, Y, true>;
+
+	template<int X, int Y>
+	using ColMajorMatrix = Matrix<X, Y, false>;
 }
