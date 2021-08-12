@@ -14,10 +14,7 @@ namespace Trainer
 	public:
 		using T = float;
 
-		Matrix()
-		{
-			data.resize(X * Y);
-		}
+		Matrix() = default;
 
 		T& get(int row, int col)
 		{
@@ -69,7 +66,7 @@ namespace Trainer
 			return static_cast<int>(data.size());
 		}
 	private:
-		std::vector<float> data;
+		std::array<float, X * Y> data;
 	};
 
 	template<int X1, int X2>
