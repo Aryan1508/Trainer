@@ -164,7 +164,7 @@ namespace Trainer
 		{
 			feed(input_indices);
 			calculate_errors(target);
-			calculate_gradients(sample, input_indices, target);
+			calculate_gradients(sample);
 		}
 	};
 }
