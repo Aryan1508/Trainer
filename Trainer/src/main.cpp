@@ -76,4 +76,14 @@ int main()
 	watch.stop();
 
 	std::cout << watch.elapsed_time().count() << '\n';
+
+	watch.reset();
+	watch.go();
+	int i = 5;
+	while (i--)
+		std::cout << "Cost: " << get_cost(*net, positions) << '\n';
+
+	watch.stop();
+
+	std::cout << watch.elapsed_time().count() << '\n';
 }

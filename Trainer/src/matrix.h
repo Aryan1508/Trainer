@@ -8,7 +8,7 @@
 
 namespace Trainer
 {
-	template<int X, int Y> 
+	template<int X, int Y, bool rowmajor = false> 
 	class Matrix
 	{
 	public:
@@ -16,14 +16,24 @@ namespace Trainer
 
 		Matrix() = default;
 
-		T& get(int row, int col)
+		/*T& get(int row, int col)
 		{
-			return data[row * Y + col];
+			return data[col * X + row];
 		}
 
 		T const& get(int row, int col) const
 		{
-			return data[row * Y + col];
+			return data[col * X + row];
+		}*/
+
+		T& get(int row, int col)
+		{
+			return rowmajor ? data[col * X + row] : data[row * Y + col];
+		}
+
+		T const& get(int row, int col) const
+		{
+			return rowmajor ? data[col * X + row] : data[row * Y + col];
 		}
 
 		T& get(int i)

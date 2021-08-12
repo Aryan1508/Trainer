@@ -32,12 +32,12 @@ namespace Trainer
 	constexpr int N_HIDDEN_NEURONS = 512;
 
 
-	template<int X1, int Y1, int X2, int Y2, typename Callable>
+	template<typename T1, typename T2, typename T3, typename Callable>
 	inline void forward_propagate(
-		Trainer::Matrix<X1, Y1> const& weights, 
-		Trainer::Matrix<X2, Y2> const& neurons, 
-		Trainer::Matrix<X1, Y2> const& biases, 
-		Trainer::Matrix<X1, Y2>& result_neurons, Callable activation)
+		T1 const& weights,
+		T2 const& neurons,
+		T3 const& biases,
+		T3& result_neurons, Callable activation)
 	{
 		assert(weights.total_cols() == neurons.total_rows());
 
@@ -52,7 +52,7 @@ namespace Trainer
 	}
 
 	inline void forward_propagate(
-		Trainer::Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS> const& weights,
+		Trainer::Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS, true> const& weights,
 		std::vector<int>        const& indices,
 		Trainer::Matrix<N_HIDDEN_NEURONS, 1> const& biases,
 		Trainer::Matrix<N_HIDDEN_NEURONS, 1>& result_neurons)
@@ -79,7 +79,8 @@ namespace Trainer
 		Matrix<N_HIDDEN_NEURONS, 1> hidden_neurons;
 		Matrix<  1             , 1> output_neuron;
 		
-		Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS> hidden_weights, hidden_weight_deltas;
+		Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS, true>  hidden_weights;
+		Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS> hidden_weight_deltas;
 		Matrix<  1            , N_HIDDEN_NEURONS> output_weights, output_weight_deltas;
 
 		Matrix<N_HIDDEN_NEURONS, 1> hidden_biases, hidden_bias_deltas;
