@@ -15,11 +15,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "board.h"
 #include "position.h"
 #include "bitboard.h"
-#include "stringparse.h"
 #include <sstream>
+#include <vector>
 
 namespace
 {
@@ -33,6 +32,20 @@ namespace
                        ptl == 'q' ? PieceType::Queen  : PieceType::King;
         return std::islower(label) ? make_piece(pt, Color::Black) : make_piece(pt, Color::White);
     }
+
+    std::vector<std::string> split_string(std::string_view str, char delim = ' ')
+    {
+        std::vector<std::string> parts;
+        std::stringstream stream(str.data());
+        std::string temp;
+
+        while (std::getline(stream, temp, delim))
+        {
+            parts.push_back(std::move(temp));
+        }
+        return parts;
+    }
+
 }
 
 std::string Position::get_fen() const 
@@ -70,29 +83,12 @@ std::string Position::get_fen() const
             empty++;
     }
     print_empty();
-    s << ' ' << side << ' ';
-
-    if (!castle_rooks)
-        s << '-';
-    else 
-    {
-        if (test_bit(castle_rooks, Square::G1)) s << "K";
-        if (test_bit(castle_rooks, Square::C1)) s << "Q";
-        if (test_bit(castle_rooks, Square::G8)) s << "k";
-        if (test_bit(castle_rooks, Square::C8)) s << "q";
-    }
-    s << ' ' << ep_sq << ' ' << halfmoves;
-
     return s.str();
 }
 
 void Position::set_fen(std::string_view fen)
 {
-    bitboards.fill(0);
-    colors.fill(0);
     pieces.fill(Empty);
-    castle_rooks = 0;
-    history_ply = 0;
 
     auto parts = split_string(fen);
 
@@ -110,21 +106,4 @@ void Position::set_fen(std::string_view fen)
             }
         }
     }
-
-    side = parts[1] == "w" ? White : Black;
-    
-    for(auto r : parts[2])
-    {
-        if (r == '-')
-            break;
-        
-        Square rook = r == 'k' ? Square::G8 :
-                      r == 'q' ? Square::C8 :
-                      r == 'K' ? Square::G1 : Square::C1;
-        set_bit(castle_rooks, rook);
-    }
-
-    ep_sq = parts[3] == "-" ? Square::bad_sq : to_sq<std::string_view>(parts[3]);
-    halfmoves = std::stoi(parts[4]);
-    key.generate(*this);
 }

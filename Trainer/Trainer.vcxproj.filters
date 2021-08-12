@@ -21,34 +21,13 @@
     <ClInclude Include="src\matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\attacks.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\bitboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\bitmask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\board.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fixed_list.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\history.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\magicmoves.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\misc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\move.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\movelist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\piece.h">
@@ -57,19 +36,10 @@
     <ClInclude Include="src\position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\position_undo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Square.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\stringparse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mappings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\zobrist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stopwatch.h">
@@ -80,37 +50,13 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\board.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\fenparse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\legalcheck.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\magicmoves.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\move.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\movegen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\piece.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\position.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\square.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stringparse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\zobrist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

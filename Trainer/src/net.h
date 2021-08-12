@@ -57,7 +57,6 @@ namespace Trainer
 		Trainer::Matrix<N_HIDDEN_NEURONS, 1> const& biases,
 		Trainer::Matrix<N_HIDDEN_NEURONS, 1>& result_neurons)
 	{
-		assert(weights.totalCols() == neurons.totalRows());
 
 		for (int i = 0; i < weights.totalRows(); i++)
 		{

@@ -10,7 +10,7 @@ namespace Trainer
 		{
 			for (int j = 0; j < 64; j++)
 			{
-				double val = test_bit(position.get_bb(Piece(i)), Square(j));
+				double val = position.get_piece(Square(j)) == Piece(i);
 				int index = i * 64 + j;
 
 				mat.get(index) = val;

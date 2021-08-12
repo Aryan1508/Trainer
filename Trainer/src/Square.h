@@ -40,60 +40,20 @@ enum class Direction : int8_t
     west = -1,
 };
 
-template <typename E>
-inline Square to_sq(E const &e)
-{
-    return static_cast<Square>(e);
-}
-
-template <>
-inline Square to_sq<std::string_view>(std::string_view const &sq)
-{
-    return static_cast<Square>((sq[0] - 97) + ((sq[1] - 49) * 8));
-}
-
-inline Direction operator+(Direction l, Direction r)
-{
-    return static_cast<Direction>(to_int(l) + to_int(r));
-}
-
-inline Square operator-(Square l, Direction r)
-{
-    return static_cast<Square>(to_int(l) - to_int(r));
-}
-
 inline Square flip_square(const Square sq)
 {
-    return to_sq(sq ^ 56);
+    return static_cast<Square>(sq ^ 56);
 }
 
 inline Square operator++(Square &sq, int)
 {
     Square temp = sq;
-    sq = to_sq(sq + 1);
+    sq = static_cast<Square>(sq + 1);
     return temp;
 }
 
-inline Square operator+(Square sq, Direction dir)
+inline Square& operator+=(Square& sq, int inc)
 {
-    return to_sq(sq + to_int(dir));
-}
-
-inline Square &operator+=(Square &sq, int inc)
-{
-    sq = to_sq(sq + inc);
+    sq = static_cast<Square>(sq + inc);
     return sq;
 }
-
-constexpr Direction relative_forward(Color side)
-{
-    return side == White ? Direction::north : Direction::south;
-}
-
-constexpr Square psqt_sq(Square sq, Color color)
-{
-    return color == White ? flip_square(sq) : sq;
-}
-
-bool is_valid_sq(std::string_view);
-std::ostream &operator<<(std::ostream &, const Square);
