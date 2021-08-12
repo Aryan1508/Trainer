@@ -51,28 +51,6 @@ namespace Trainer
 		}
 	}
 
-	inline void forward_propagate(
-		Trainer::Matrix<N_HIDDEN_NEURONS, N_INPUT_NEURONS, true> const& weights,
-		std::vector<int>        const& indices,
-		Trainer::Matrix<N_HIDDEN_NEURONS, 1> const& biases,
-		Trainer::Matrix<N_HIDDEN_NEURONS, 1>& result_neurons)
-	{
-		result_neurons.set(0);
-
-		for (auto index : indices)
-		{
-			for (int i = 0; i < weights.total_rows(); i++)
-			{
-				result_neurons.get(i) += weights.get(i, index);
-			}
-		}
-
-		for (int i = 0; i < weights.total_rows(); i++)
-		{
-			result_neurons.get(i) = relu(result_neurons.get(i) + biases.get(i));
-		}
-	}
-	
 	class Network
 	{
 	public:
@@ -111,7 +89,17 @@ namespace Trainer
 
 		float feed(std::vector<int> const& input_indices)
 		{
-			forward_propagate(hidden_weights, input_indices, hidden_biases, hidden_neurons);
+			hidden_neurons.set(0);
+
+			for (auto index : input_indices)
+			{
+				for (int i = 0; i < hidden_weights.total_rows(); i++)
+					hidden_neurons.get(i) += hidden_weights.get(i, index);
+			}
+
+			for (int i = 0; i < hidden_neurons.size(); i++)
+				hidden_neurons.get(i) = relu(hidden_neurons.get(i) + hidden_biases.get(i));
+
 			forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 			return output_neuron.get(0);
 		}
