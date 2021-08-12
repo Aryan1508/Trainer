@@ -10,6 +10,7 @@ static void forward_propagate(
 {
 	assert(weights.total_cols() == neurons.total_rows());
 
+    #pragma omp parallel for schedule(auto) num_threads(8)
 	for (int i = 0; i < weights.total_rows(); i++)
 	{
 		float sum = 0;
@@ -76,7 +77,7 @@ namespace Trainer
 
 		uint64_t fileCount = 0;
 		fread(&fileCount, sizeof(uint64_t), 1, f);
-		
+
 		if (count != fileCount)
 		{
 			std::cerr << "Error loading network" << std::endl;
@@ -128,7 +129,7 @@ namespace Trainer
 		auto apply_gradient =
         [](float& value, float& gradient)
         {
-            value -= gradient * 0.05;
+            value -= gradient / 128;
             gradient = 0.0f;
         };
 
