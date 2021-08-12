@@ -48,6 +48,11 @@ namespace Trainer
 			for (auto& val : data) val = distrib(gen);
 		}
 
+		float* raw()
+		{
+			return &data[0];
+		}
+
 		static constexpr int total_rows() 
 		{
 			return X;
@@ -57,6 +62,7 @@ namespace Trainer
 		{
 			return Y;
 		}
+
 		static constexpr int size() 
 		{
 			return static_cast<int>(X * Y);

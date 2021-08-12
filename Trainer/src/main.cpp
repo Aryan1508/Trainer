@@ -12,6 +12,12 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 	{
         i++;
 
+		if (i % 16000 == 0)
+		{
+			net.apply_gradients();
+			std::cout << "Cost: " << cost << '\n';
+		}
+
 	    Trainer::InputVector sample;
 		std::vector<int> indices;
 
@@ -20,16 +26,18 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 	    net.back_propagate(sample, indices, position.result);
 		cost += pow(position.result - net.get_output(), 2);
 	}
-    net.apply_gradients();
-    std::cout << "Cost: " << cost << '\n';            
 }
 
 int main()
 {
 	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
+	net->load_network("test.nn");
 
-	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6", 5000);
+	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6", 10000000);
 
-    while(1)
-        fit(*net, positions);
+	for (int i = 0; i < 1000; i++)
+	{
+		fit(*net, positions);
+		net->save_network("test.nn");
+	}
 }

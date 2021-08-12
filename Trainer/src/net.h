@@ -13,7 +13,7 @@ namespace Trainer
 	using ColVector = Matrix<X, 1>;
 	
 	using InputVector  = ColVector<768>;
-	using HiddenVector = ColVector<512>;
+	using HiddenVector = ColVector<16>;
 	using OutputVector = ColVector<1>;
 
 	class Network
@@ -21,7 +21,12 @@ namespace Trainer
 	public:
 		Network();
 
+		void save_network(std::string_view fil);
+		
+		void load_network(std::string_view fil);
+
 		void apply_gradients();
+		
 		void feed(std::vector<int> const& input_indices);
 
 		void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
@@ -51,9 +56,9 @@ namespace Trainer
 		OutputVector output_neuron;
 		OutputVector output_bias_deltas;
 
-		RowMajorMatrix<512, 768>  hidden_weights;
+		RowMajorMatrix<16, 768>  hidden_weights;
 		ColMajorMatrix<  1, 512>  output_weights;
-		ColMajorMatrix<512, 768>  hidden_weight_deltas;
+		ColMajorMatrix<16, 768>  hidden_weight_deltas;
 		ColMajorMatrix<  1, 512>  output_weight_deltas;
 	};
 }

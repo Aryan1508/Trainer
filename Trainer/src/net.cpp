@@ -1,4 +1,5 @@
 #include "net.h"
+#include <fstream>
 
 template<typename T1, typename T2, typename T3, typename Callable>
 static void forward_propagate(
@@ -36,6 +37,59 @@ namespace Trainer
 		hidden_bias_deltas  .set(0);
 		output_weight_deltas.set(0);
 		hidden_weight_deltas.set(0);
+	}
+
+	void Network::save_network(std::string_view path)
+	{
+		const char* p = path.data();
+		FILE* f = fopen(p, "wb");
+
+		uint64_t count = 0;
+
+		count += hidden_weights.size();
+		count += output_weights.size();
+		count += hidden_biases.size();
+		count += output_bias.size();
+
+		fwrite(&count, sizeof(uint64_t), 1, f);
+
+		fwrite(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
+		fwrite(output_weights.raw(), sizeof(float), output_weights.size(), f);
+
+		fwrite(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
+		fwrite(output_bias.raw(), sizeof(float), output_bias.size(), f);
+
+		fclose(f);
+	}
+
+	void Network::load_network(std::string_view path)
+	{
+		const char* p = path.data();
+		FILE* f = fopen(p, "rb");
+
+		uint64_t count = 0;
+
+		count += hidden_weights.size();
+		count += output_weights.size();
+		count += hidden_biases.size();
+		count += output_bias.size();
+
+		uint64_t fileCount = 0;
+		fread(&fileCount, sizeof(uint64_t), 1, f);
+		
+		if (count != fileCount)
+		{
+			std::cerr << "Error loading network" << std::endl;
+			std::terminate();
+		}
+
+		fread(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
+		fread(output_weights.raw(), sizeof(float), output_weights.size(), f);
+
+		fread(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
+		fread(output_bias.raw(), sizeof(float), output_bias.size(), f);
+
+		fclose(f);
 	}
 
 	void Network::feed(std::vector<int> const& input_indices)
