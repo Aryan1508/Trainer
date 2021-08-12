@@ -9,11 +9,14 @@
 
 namespace Trainer
 {
+    constexpr int INPUT_SIZE  = 768;
+    constexpr int HIDDEN_SIZE = 128;
+
 	template<int X>
 	using ColVector = Matrix<X, 1>;
-	
-	using InputVector  = ColVector<768>;
-	using HiddenVector = ColVector<16>;
+
+	using InputVector  = ColVector<INPUT_SIZE>;
+	using HiddenVector = ColVector<HIDDEN_SIZE>;
 	using OutputVector = ColVector<1>;
 
 	class Network
@@ -56,9 +59,9 @@ namespace Trainer
 		OutputVector output_neuron;
 		OutputVector output_bias_deltas;
 
-		RowMajorMatrix<16, 768>  hidden_weights;
-		ColMajorMatrix<  1, 512>  output_weights;
-		ColMajorMatrix<16, 768>  hidden_weight_deltas;
-		ColMajorMatrix<  1, 512>  output_weight_deltas;
+		RowMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
+		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weights;
+		ColMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weight_deltas;
+		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weight_deltas;
 	};
 }

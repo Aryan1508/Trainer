@@ -40,10 +40,9 @@ namespace Trainer
 
 		void randomize(int inputs)
 		{
-			float a = 2 / sqrtf((float)inputs);
-
-			std::mt19937 gen(754232);
-			std::normal_distribution distrib(0.0f, a);
+            std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_real_distribution distrib(0.0f, 2 / sqrtf(inputs));
 
 			for (auto& val : data) val = distrib(gen);
 		}

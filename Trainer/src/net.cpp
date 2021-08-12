@@ -126,13 +126,12 @@ namespace Trainer
 	void Network::apply_gradients()
 	{
 		auto apply_gradient =
-			[](float& value, float& gradient)
-			{
-				value -= 0.05f * gradient;
-				gradient = 0;
-			};
+        [](float& value, float& gradient)
+        {
+            value -= gradient * 0.05;
+            gradient = 0.0f;
+        };
 
-		float rate = 0.01f;
 		for (int i = 0; i < hidden_neurons.total_rows(); i++)
 		{
 			for (int j = 0; j < InputVector::size(); j++)
