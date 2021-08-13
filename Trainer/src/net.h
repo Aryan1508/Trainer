@@ -10,7 +10,7 @@
 namespace Trainer
 {
     constexpr int INPUT_SIZE  = 768;
-    constexpr int HIDDEN_SIZE = 32;
+    constexpr int HIDDEN_SIZE = 256;
 
 	template<int X>
 	using ColVector = Matrix<X, 1>;
@@ -53,7 +53,7 @@ namespace Trainer
 		OutputVector output_neuron;
 		OutputVector output_bias_deltas;
 
-		RowMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
+		ColMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
 		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weights;
 		ColMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weight_deltas;
 		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weight_deltas;

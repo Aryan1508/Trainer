@@ -33,9 +33,9 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 int main()
 {
 	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
-	net->load_network("shuffled_depth_6.nn");
+	//net->load_network("shuffled_depth_6.nn");
 
-	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6", 1000000);
+	auto positions = Trainer::load_positions("C:/tuning/shuffled_depth_6.book", 100000);
 
 	for (int i = 0; i < 100000; i++)
 	{
