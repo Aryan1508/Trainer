@@ -6,7 +6,7 @@
 
 #include "matrix.h"
 #include "optimize.h"
-#include "activation.h"
+#include "activation.h"	
 
 namespace Trainer
 {

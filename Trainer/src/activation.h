@@ -6,12 +6,12 @@ namespace Trainer
 {
 	inline float sigmoid(float x)
 	{
-		return 1.0f / (1.0f + expf(-x * (2.5f / 400.0f)));
+		return 1.0f / (1.0f + expf(-x));
 	}
 
 	inline float sigmoid_prime(float x)
 	{
-		return x * (1.0f - x) * (2.5f / 400.0f);
+		return x * (1.0f - x);
 	}
 
 	inline float relu(float x)

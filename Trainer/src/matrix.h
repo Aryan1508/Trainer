@@ -42,7 +42,7 @@ namespace Trainer
 		{
             std::random_device rd;
 			std::mt19937 gen(rd());
-			std::uniform_real_distribution distrib(0.0f, 2 / sqrtf((float)inputs));
+			std::normal_distribution<float> distrib(0.0f, 2 / sqrtf((float)inputs));
 
 			for (auto& val : data) val = distrib(gen);
 		}

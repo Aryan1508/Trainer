@@ -7,17 +7,20 @@ namespace Trainer
 	void position_to_input(Position const& position, Matrix<Parameter, 768, 1>& mat, std::vector<int>& input_indices)
 	{
 		input_indices.reserve(32);
-		for (int i = 0; i < 12; i++)
+		mat.set(Parameter());
+
+		for (int j = 0; j < 64; j++)
 		{
-			for (int j = 0; j < 64; j++)
+			Square sq = Square(j);
+				
+			if (position.get_piece(Square(j)) != Piece::Empty)
 			{
-				float val = position.get_piece(Square(j)) == Piece(i);
-				int index = i * 64 + j;
+				Piece p = position.get_piece(Square(j));
+				int index = p * 64 + sq;
 
-				mat.get(index).value = val;
+				mat.get(index).value = 1.0f;
 
-				if (val)
-					input_indices.push_back(index);
+				input_indices.push_back(index);
 			}
 		}
 	}
