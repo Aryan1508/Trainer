@@ -28,8 +28,6 @@ namespace Trainer
 		
 		void load_network(std::string_view fil);
 
-		//void apply_gradients();
-		
 		void feed(std::vector<int> const& input_indices);
 
 		void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
@@ -47,15 +45,11 @@ namespace Trainer
 	private:
 		HiddenVector  hidden_biases;
 		HiddenVector  hidden_neurons;
-		HiddenVector  hidden_bias_deltas;
 
 		OutputVector output_bias;
 		OutputVector output_neuron;
-		OutputVector output_bias_deltas;
 
 		ColMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
 		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weights;
-		ColMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weight_deltas;
-		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weight_deltas;
 	};
 }

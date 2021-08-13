@@ -10,10 +10,10 @@ static void forward_propagate(
 {
 	assert(weights.total_cols() == neurons.total_rows());
 
-    #pragma omp parallel for schedule(auto) num_threads(8)
 	for (int i = 0; i < weights.total_rows(); i++)
 	{
 		float sum = 0;
+	
 		for (int k = 0; k < weights.total_cols(); k++)
 			sum += weights.get(i, k) * neurons.get(k);
 
@@ -97,6 +97,7 @@ namespace Trainer
 				hidden_neurons.get(i) += hidden_weights.get(i, index);
 		}
 
+#pragma omp parallel for schedule(static, 64) num_threads(4) 
 		for (int i = 0; i < hidden_neurons.size(); i++)
 			hidden_neurons.get(i) = relu(hidden_neurons.get(i) + hidden_biases.get(i));
 
@@ -128,40 +129,13 @@ namespace Trainer
 
 				for (int j = 0; j < sample.total_rows(); j++)
 				{
-					//hidden_weight_deltas.get(i, j) += hidden_error * sample.get(j);
 					apply_gradient(hidden_weights.get(i, j), hidden_error * sample.get(j));
 				}
 				
-				//output_weight_deltas.get(i) += hidden_neurons.get(i) * error;
 				apply_gradient(output_weights.get(i), hidden_neurons.get(i) * error);
-
-				//hidden_bias_deltas.get(i)   += gradient;
 				apply_gradient(hidden_biases.get(i), hidden_error);
 			}
 		}
-		//output_bias_deltas.get(0) += error;
 		apply_gradient(output_bias.get(0), error);
 	}
-
-	//void Network::apply_gradients()
-	//{
-	//	auto apply_gradient =
- //       [](float& value, float& gradient)
- //       {
- //           value -= gradient / 16384;
- //           gradient = 0.0f;
- //       };
-
-	//	for (int i = 0; i < hidden_neurons.total_rows(); i++)
-	//	{
-	//		for (int j = 0; j < InputVector::size(); j++)
-	//		{
-	//			apply_gradient(hidden_weights.get(i, j), hidden_weight_deltas.get(i, j));
-	//		}
-
-	//		apply_gradient(hidden_biases .get(i), hidden_bias_deltas  .get(i));
-	//		apply_gradient(output_weights.get(i), output_weight_deltas.get(i));
-	//	}
-	//	apply_gradient(output_bias.get(0), output_bias_deltas.get(0));
-	//}
 }
