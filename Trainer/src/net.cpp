@@ -121,12 +121,12 @@ namespace Trainer
 
 				for (int j = 0; j < sample.total_rows(); j++)
 				{
-					hidden_weights.get(i, j).value += hidden_error * sample.get(j).value;
+					hidden_weights.get(i, j).gradient += hidden_error * sample.get(j).value;
 				}
-				output_weights.get(i).value += hidden_neurons.get(i).value * error;
-				hidden_biases.get(i).value  += hidden_error;
+				output_weights.get(i).gradient += hidden_neurons.get(i).value * error;
+				hidden_biases.get(i).gradient += hidden_error;
 			}
 		}
-		output_bias.get(0).value += error;
+		output_bias.get(0).gradient += error;
 	}
 }
