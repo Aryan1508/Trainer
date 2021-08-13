@@ -43,7 +43,8 @@ namespace Trainer
 		}
 
 		void update_gradients(InputVector const& sample, float target, std::vector<int> const& indices);
-	
+		void apply_gradients();
+
 		HiddenVector  hidden_biases;
 		HiddenVector  hidden_neurons;
 

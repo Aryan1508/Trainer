@@ -129,4 +129,19 @@ namespace Trainer
 		}
 		output_bias.get(0).gradient += error;
 	}
+
+	void Network::apply_gradients()
+	{
+		for (int i = 0; i < hidden_neurons.total_rows(); i++)
+		{
+   			for (int j = 0; j < InputVector::size(); j++)
+   			{
+				hidden_weights.get(i, j).apply_gradient();
+   			}
+
+			hidden_biases.get(i).apply_gradient();
+			output_weights.get(i).apply_gradient();
+		}
+		output_bias.get(0).apply_gradient();
+	}
 }
