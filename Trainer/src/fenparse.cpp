@@ -106,4 +106,6 @@ void Position::set_fen(std::string_view fen)
             }
         }
     }
+
+    side = parts[1] == "w";
 }

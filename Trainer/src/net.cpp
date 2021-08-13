@@ -32,10 +32,6 @@ namespace Trainer
 
 		hidden_neurons      .set(0);
 		output_neuron       .set(0);
-		output_bias_deltas  .set(0);
-		hidden_bias_deltas  .set(0);
-		output_weight_deltas.set(0);
-		hidden_weight_deltas.set(0);
 	}
 
 	void Network::save_network(std::string_view path)
@@ -107,47 +103,65 @@ namespace Trainer
 		forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 	}
 
-	void Network::calculate_errors(InputVector const& sample, float target)
+	float cost(Network& net, std::vector<int> const& indices, float target)
 	{
+		net.feed(indices);
+		return powf(target - net.get_output(), 2.0f);
+	}
+
+	void Network::calculate_errors(InputVector const& sample, float target, std::vector<int> const& indices)
+	{
+		auto apply_gradient =
+			[](float& value, float gradient)
+		{
+			value -= gradient;
+		};
+
+
 		float error = (output_neuron.get(0) - target) * sigmoid_prime(output_neuron.get(0)) * 2;
 
 		for (int i = 0; i < hidden_neurons.size(); i++)
 		{
 			if (hidden_neurons.get(i) > 0)
 			{
-				float gradient = error * output_weights.get(i);
+				float hidden_error = error * output_weights.get(i);
 
 				for (int j = 0; j < sample.total_rows(); j++)
 				{
-					hidden_weight_deltas.get(i, j) += gradient * sample.get(j);
+					//hidden_weight_deltas.get(i, j) += hidden_error * sample.get(j);
+					apply_gradient(hidden_weights.get(i, j), hidden_error * sample.get(j));
 				}
-				output_weight_deltas.get(i) += hidden_neurons.get(i) * error;
-				hidden_bias_deltas.get(i)   += gradient;
+				
+				//output_weight_deltas.get(i) += hidden_neurons.get(i) * error;
+				apply_gradient(output_weights.get(i), hidden_neurons.get(i) * error);
+
+				//hidden_bias_deltas.get(i)   += gradient;
+				apply_gradient(hidden_biases.get(i), hidden_error);
 			}
 		}
-
-		output_bias_deltas.get(0) += error;
+		//output_bias_deltas.get(0) += error;
+		apply_gradient(output_bias.get(0), error);
 	}
 
-	void Network::apply_gradients()
-	{
-		auto apply_gradient =
-        [](float& value, float& gradient)
-        {
-            value -= gradient / 256;
-            gradient = 0.0f;
-        };
+	//void Network::apply_gradients()
+	//{
+	//	auto apply_gradient =
+ //       [](float& value, float& gradient)
+ //       {
+ //           value -= gradient / 16384;
+ //           gradient = 0.0f;
+ //       };
 
-		for (int i = 0; i < hidden_neurons.total_rows(); i++)
-		{
-			for (int j = 0; j < InputVector::size(); j++)
-			{
-				apply_gradient(hidden_weights.get(i, j), hidden_weight_deltas.get(i, j));
-			}
+	//	for (int i = 0; i < hidden_neurons.total_rows(); i++)
+	//	{
+	//		for (int j = 0; j < InputVector::size(); j++)
+	//		{
+	//			apply_gradient(hidden_weights.get(i, j), hidden_weight_deltas.get(i, j));
+	//		}
 
-			apply_gradient(hidden_biases .get(i), hidden_bias_deltas  .get(i));
-			apply_gradient(output_weights.get(i), output_weight_deltas.get(i));
-		}
-		apply_gradient(output_bias.get(0), output_bias_deltas.get(0));
-	}
+	//		apply_gradient(hidden_biases .get(i), hidden_bias_deltas  .get(i));
+	//		apply_gradient(output_weights.get(i), output_weight_deltas.get(i));
+	//	}
+	//	apply_gradient(output_bias.get(0), output_bias_deltas.get(0));
+	//}
 }

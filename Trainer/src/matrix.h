@@ -44,7 +44,7 @@ namespace Trainer
 			std::mt19937 gen(rd());
 			std::uniform_real_distribution distrib(0.0f, 2 / sqrtf((float)inputs));
 
-			for (auto& val : data) val = distrib(gen);
+			for (auto& val : data) val = 2;
 		}
 
 		float* raw()

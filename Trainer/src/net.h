@@ -10,7 +10,7 @@
 namespace Trainer
 {
     constexpr int INPUT_SIZE  = 768;
-    constexpr int HIDDEN_SIZE = 128;
+    constexpr int HIDDEN_SIZE = 32;
 
 	template<int X>
 	using ColVector = Matrix<X, 1>;
@@ -28,14 +28,14 @@ namespace Trainer
 		
 		void load_network(std::string_view fil);
 
-		void apply_gradients();
+		//void apply_gradients();
 		
 		void feed(std::vector<int> const& input_indices);
 
 		void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
 		{
 			feed(input_indices);
-			calculate_errors(sample, target);
+			calculate_errors(sample, target, input_indices);
 		}
 
 		float get_output() const
@@ -43,7 +43,7 @@ namespace Trainer
 			return output_neuron.get(0);
 		}
 	private:
-		void calculate_errors(InputVector const& sample, float target);
+		void calculate_errors(InputVector const& sample, float target, std::vector<int> const& indices);
 	private:
 		HiddenVector  hidden_biases;
 		HiddenVector  hidden_neurons;
