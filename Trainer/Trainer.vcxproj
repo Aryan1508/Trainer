@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="src\activation.h" />
     <ClInclude Include="src\bitmask.h" />
+    <ClInclude Include="src\optimize.h" />
     <ClInclude Include="src\reader.h" />
     <ClInclude Include="src\mappings.h" />
     <ClInclude Include="src\matrix.h" />

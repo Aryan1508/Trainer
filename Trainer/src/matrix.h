@@ -7,33 +7,33 @@
 
 namespace Trainer
 {
-	template<int X, int Y, bool rowmajor = false> 
+	template<typename T, int X, int Y, bool rowmajor = false> 
 	class Matrix
 	{
 	public:
 		Matrix() = default;
 
-		float& get(int row, int col)
+		T& get(int row, int col)
 		{
 			return rowmajor ? data[col * X + row] : data[row * Y + col];
 		}
 
-		float get(int row, int col) const
+		T const& get(int row, int col) const
 		{
 			return rowmajor ? data[col * X + row] : data[row * Y + col];
 		}
 
-		float& get(int i)
+		T& get(int i)
 		{
 			return data[i];
 		}
 
-		float get(int i) const
+		T const& get(int i) const
 		{
 			return data[i];
 		}
 
-		void set(float val)
+		void set(T const& val)
 		{
 			std::fill(data.begin(), data.end(), val);
 		}
@@ -44,10 +44,10 @@ namespace Trainer
 			std::mt19937 gen(rd());
 			std::uniform_real_distribution distrib(0.0f, 2 / sqrtf((float)inputs));
 
-			for (auto& val : data) val = 2;
+			for (auto& val : data) val = distrib(gen);
 		}
 
-		float* raw()
+		T* raw()
 		{
 			return &data[0];
 		}
@@ -67,12 +67,12 @@ namespace Trainer
 			return static_cast<int>(X * Y);
 		}
 	private:
-		std::array<float, X * Y> data;
+		std::array<T, X * Y> data;
 	};
 
-	template<int X, int Y>
-	using RowMajorMatrix = Matrix<X, Y, true>;
+	template<typename T, int X, int Y>
+	using RowMajorMatrix = Matrix<T, X, Y, true>;
 
-	template<int X, int Y>
-	using ColMajorMatrix = Matrix<X, Y, false>;
+	template<typename T, int X, int Y>
+	using ColMajorMatrix = Matrix<T, X, Y, false>;
 }

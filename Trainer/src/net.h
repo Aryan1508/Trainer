@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "matrix.h"
+#include "optimize.h"
 #include "activation.h"
 
 namespace Trainer
@@ -12,12 +13,12 @@ namespace Trainer
     constexpr int INPUT_SIZE  = 768;
     constexpr int HIDDEN_SIZE = 256;
 
-	template<int X>
-	using ColVector = Matrix<X, 1>;
+	template<typename T, int X>
+	using ColVector = Matrix<T, X, 1>;
 
-	using InputVector  = ColVector<INPUT_SIZE>;
-	using HiddenVector = ColVector<HIDDEN_SIZE>;
-	using OutputVector = ColVector<1>;
+	using InputVector  = ColVector<Parameter, INPUT_SIZE>;
+	using HiddenVector = ColVector<Parameter, HIDDEN_SIZE>;
+	using OutputVector = ColVector<Parameter, 1>;
 
 	class Network
 	{
@@ -33,23 +34,23 @@ namespace Trainer
 		void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
 		{
 			feed(input_indices);
-			calculate_errors(sample, target, input_indices);
+			update_gradients(sample, target, input_indices);
 		}
 
 		float get_output() const
 		{
-			return output_neuron.get(0);
+			return output_neuron.get(0).value;
 		}
-	private:
-		void calculate_errors(InputVector const& sample, float target, std::vector<int> const& indices);
-	private:
+
+		void update_gradients(InputVector const& sample, float target, std::vector<int> const& indices);
+	
 		HiddenVector  hidden_biases;
 		HiddenVector  hidden_neurons;
 
 		OutputVector output_bias;
 		OutputVector output_neuron;
 
-		ColMajorMatrix<HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
-		ColMajorMatrix<  1        , HIDDEN_SIZE>  output_weights;
+		ColMajorMatrix<Parameter, HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
+		ColMajorMatrix<Parameter,  1        , HIDDEN_SIZE>  output_weights;
 	};
 }

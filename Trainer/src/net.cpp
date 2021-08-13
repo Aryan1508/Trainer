@@ -15,9 +15,9 @@ static void forward_propagate(
 		float sum = 0;
 	
 		for (int k = 0; k < weights.total_cols(); k++)
-			sum += weights.get(i, k) * neurons.get(k);
+			sum += weights.get(i, k).value * neurons.get(k).value;
 
-		result_neurons.get(i) = activation(sum + biases.get(i));
+		result_neurons.get(i).value = activation(sum + biases.get(i).value);
 	}
 }
 
@@ -30,8 +30,8 @@ namespace Trainer
 		output_weights.randomize(HiddenVector::size());
 		output_bias   .randomize(HiddenVector::size());
 
-		hidden_neurons      .set(0);
-		output_neuron       .set(0);
+		hidden_neurons      .set(Parameter());
+		output_neuron       .set(Parameter());
 	}
 
 	void Network::save_network(std::string_view path)
@@ -48,11 +48,11 @@ namespace Trainer
 
 		fwrite(&count, sizeof(uint64_t), 1, f);
 
-		fwrite(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
-		fwrite(output_weights.raw(), sizeof(float), output_weights.size(), f);
+		fwrite(hidden_weights.raw(), sizeof(Parameter), hidden_weights.size(), f);
+		fwrite(output_weights.raw(), sizeof(Parameter), output_weights.size(), f);
 
-		fwrite(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
-		fwrite(output_bias.raw(), sizeof(float), output_bias.size(), f);
+		fwrite(hidden_biases.raw(), sizeof(Parameter), hidden_biases.size(), f);
+		fwrite(output_bias.raw(), sizeof(Parameter), output_bias.size(), f);
 
 		fclose(f);
 	}
@@ -78,28 +78,27 @@ namespace Trainer
 			std::terminate();
 		}
 
-		fread(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
-		fread(output_weights.raw(), sizeof(float), output_weights.size(), f);
+		fread(hidden_weights.raw(), sizeof(Parameter), hidden_weights.size(), f);
+		fread(output_weights.raw(), sizeof(Parameter), output_weights.size(), f);
 
-		fread(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
-		fread(output_bias.raw(), sizeof(float), output_bias.size(), f);
+		fread(hidden_biases.raw(), sizeof(Parameter), hidden_biases.size(), f);
+		fread(output_bias.raw(), sizeof(Parameter), output_bias.size(), f);
 
 		fclose(f);
 	}
 
 	void Network::feed(std::vector<int> const& input_indices)
 	{
-		hidden_neurons.set(0);
+		for (int i = 0; i < hidden_neurons.size(); i++) hidden_neurons.get(i).value = 0;
 
 		for (auto index : input_indices)
 		{
 			for (int i = 0; i < hidden_weights.total_rows(); i++)
-				hidden_neurons.get(i) += hidden_weights.get(i, index);
+				hidden_neurons.get(i).value += hidden_weights.get(i, index).value;
 		}
 
-#pragma omp parallel for schedule(static, 64) num_threads(4) 
 		for (int i = 0; i < hidden_neurons.size(); i++)
-			hidden_neurons.get(i) = relu(hidden_neurons.get(i) + hidden_biases.get(i));
+			hidden_neurons.get(i).value = relu(hidden_neurons.get(i).value + hidden_biases.get(i).value);
 
 		forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
 	}
@@ -110,32 +109,24 @@ namespace Trainer
 		return powf(target - net.get_output(), 2.0f);
 	}
 
-	void Network::calculate_errors(InputVector const& sample, float target, std::vector<int> const& indices)
+	void Network::update_gradients(InputVector const& sample, float target, std::vector<int> const& indices)
 	{
-		auto apply_gradient =
-			[](float& value, float gradient)
-		{
-			value -= gradient;
-		};
-
-
-		float error = (output_neuron.get(0) - target) * sigmoid_prime(output_neuron.get(0)) * 2;
+		float error = (get_output() - target) * sigmoid_prime(get_output()) * 2;
 
 		for (int i = 0; i < hidden_neurons.size(); i++)
 		{
-			if (hidden_neurons.get(i) > 0)
+			if (hidden_neurons.get(i).value > 0)
 			{
-				float hidden_error = error * output_weights.get(i);
+				float hidden_error = error * output_weights.get(i).value;
 
 				for (int j = 0; j < sample.total_rows(); j++)
 				{
-					apply_gradient(hidden_weights.get(i, j), hidden_error * sample.get(j));
+					hidden_weights.get(i, j).value += hidden_error * sample.get(j).value;
 				}
-				
-				apply_gradient(output_weights.get(i), hidden_neurons.get(i) * error);
-				apply_gradient(hidden_biases.get(i), hidden_error);
+				output_weights.get(i).value += hidden_neurons.get(i).value * error;
+				hidden_biases.get(i).value  += hidden_error;
 			}
 		}
-		apply_gradient(output_bias.get(0), error);
+		output_bias.get(0).value += error;
 	}
 }
