@@ -1,26 +1,4 @@
 #include "net.h"
-#include <fstream>
-#include <thread>
-
-template<typename T1, typename T2, typename T3, typename Callable>
-static void forward_propagate(
-	T1 const& weights,
-	T2 const& neurons,
-	T3 const& biases,
-	T3& result_neurons, Callable activation)
-{
-	assert(weights.total_cols() == neurons.total_rows());
-
-	for (int i = 0; i < weights.total_rows(); i++)
-	{
-		float sum = 0;
-	
-		for (int k = 0; k < weights.total_cols(); k++)
-			sum += weights.get(i, k).value * neurons.get(k).value;
-
-		result_neurons.get(i).value = activation(sum + biases.get(i).value);
-	}
-}
 
 namespace Trainer
 {
@@ -101,7 +79,15 @@ namespace Trainer
 		for (int i = 0; i < hidden_neurons.size(); i++)
 			hidden_neurons.get(i).value = relu(hidden_neurons.get(i).value + hidden_biases.get(i).value);
 
-		forward_propagate(output_weights, hidden_neurons, output_bias, output_neuron, sigmoid);
+		for (int i = 0; i < output_weights.total_rows(); i++)
+		{
+			float sum = 0;
+
+			for (int k = 0; k < output_weights.total_cols(); k++)
+				sum += output_weights.get(i, k).value * hidden_neurons.get(k).value;
+
+			output_neuron.get(i).value = sigmoid(sum + output_bias.get(i).value);
+		}
 	}
 
 	float cost(Network& net, std::vector<int> const& indices, float target)
@@ -110,7 +96,7 @@ namespace Trainer
 		return powf(target - net.get_output(), 2.0f);
 	}
 
-	void Network::update_gradients(InputVector const& sample, float target, std::vector<int> const& indices)
+	void Network::update_gradients(InputVector const& sample, float target, std::vector<int> const&)
 	{
 		float error = (get_output() - target) * sigmoid_prime(get_output()) * 2;
 
@@ -132,7 +118,7 @@ namespace Trainer
 	}
 
 	template<typename T>
-	void apply_gradients(T& mat)
+	void apply(T& mat)
 	{
 		for (int i = 0; i < mat.size(); i++)
 			mat.get(i).apply_gradient();
@@ -140,9 +126,9 @@ namespace Trainer
 
 	void Network::apply_gradients()
 	{
-		Trainer::apply_gradients(hidden_weights);
-		Trainer::apply_gradients(hidden_biases);
-		Trainer::apply_gradients(output_weights);
-		Trainer::apply_gradients(output_bias);
+		apply(hidden_weights);
+		apply(hidden_biases);
+		apply(output_weights);
+		apply(output_bias);
 	}
 }
