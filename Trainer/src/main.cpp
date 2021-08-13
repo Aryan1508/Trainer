@@ -2,6 +2,8 @@
 #include "reader.h"
 #include "mappings.h"
 #include "stopwatch.h"
+#include <memory>
+#include <iomanip>
 
 void fit(Trainer::Network& net, std::vector<Position>& positions)
 {

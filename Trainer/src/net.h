@@ -1,8 +1,5 @@
 #pragma once
 #include <vector>
-#include <random>
-#include <iomanip>
-#include <iostream>
 
 #include "matrix.h"
 #include "optimize.h"
