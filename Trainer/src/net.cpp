@@ -1,5 +1,6 @@
 #include "net.h"
 #include <fstream>
+#include <thread>
 
 template<typename T1, typename T2, typename T3, typename Callable>
 static void forward_propagate(
@@ -130,18 +131,18 @@ namespace Trainer
 		output_bias.get(0).gradient += error;
 	}
 
+	template<typename T>
+	void apply_gradients(T& mat)
+	{
+		for (int i = 0; i < mat.size(); i++)
+			mat.get(i).apply_gradient();
+	}
+
 	void Network::apply_gradients()
 	{
-		for (int i = 0; i < hidden_neurons.total_rows(); i++)
-		{
-   			for (int j = 0; j < InputVector::size(); j++)
-   			{
-				hidden_weights.get(i, j).apply_gradient();
-   			}
-
-			hidden_biases.get(i).apply_gradient();
-			output_weights.get(i).apply_gradient();
-		}
-		output_bias.get(0).apply_gradient();
+		Trainer::apply_gradients(hidden_weights);
+		Trainer::apply_gradients(hidden_biases);
+		Trainer::apply_gradients(output_weights);
+		Trainer::apply_gradients(output_bias);
 	}
 }
