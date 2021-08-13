@@ -28,11 +28,13 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
 		cost += powf(net.get_output() - position.result, 2.0f);
 	}
     
-	std::cout << "Cost: " << std::fixed << std::setprecision(8) << (cost / (double)positions.size()) << '\n';
+	std::cout << "Cost: " << (cost / (double)positions.size()) << '\n';
 }
 
 int main()
 {
+	std::cout << std::fixed << std::setprecision(8);
+
 	std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
 	//net->load_network("shuffled_depth_6.nn");
 
