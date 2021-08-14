@@ -90,13 +90,7 @@ namespace Trainer
 		}
 	}
 
-	float cost(Network& net, std::vector<int> const& indices, float target)
-	{
-		net.feed(indices);
-		return powf(target - net.get_output(), 2.0f);
-	}
-
-	void Network::update_gradients(InputVector const& sample, float target, std::vector<int> const&)
+	void Network::update_gradients(InputVector const& sample, float target)
 	{
 		float error = (get_output() - target) * sigmoid_prime(get_output()) * 2;
 

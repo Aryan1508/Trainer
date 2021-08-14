@@ -31,7 +31,7 @@ namespace Trainer
 		void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
 		{
 			feed(input_indices);
-			update_gradients(sample, target, input_indices);
+			update_gradients(sample, target);
 		}
 
 		float get_output() const
@@ -39,7 +39,7 @@ namespace Trainer
 			return output_neuron.get(0).value;
 		}
 
-		void update_gradients(InputVector const& sample, float target, std::vector<int> const& indices);
+		void update_gradients(InputVector const& sample, float target);
 		void apply_gradients();
 
 		HiddenVector  hidden_biases;
