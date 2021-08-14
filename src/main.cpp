@@ -45,6 +45,6 @@ int main()
     for (int i = 0; i < 100000; i++)
     {
         fit(*net, positions);
-        net->save_network("shuffled_depth_6.nn");
+        // net->save_network("shuffled_depth_6.nn");
     }
 }

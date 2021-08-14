@@ -114,32 +114,17 @@ namespace Trainer
     }
 
     template<typename T>
-    void apply_gradients(T& matrix, int begin, int total)
+    void apply_gradients(T& matrix)
     {
-        for (int i = begin; i < total; i++)
+        for (int i = 0; i < matrix.size(); i++)
             matrix.get(i).apply_gradient();
-    }
-
-    template<typename T> 
-    void apply(T& mat, int threads)
-    {
-        int chunk = mat.size() / threads;
-
-        std::vector<std::thread> workers;
-
-        for (int i = 0; i < mat.size(); i += chunk)
-        {
-            workers.emplace_back(Trainer::apply_gradients<T>, std::ref(mat), i, i +chunk);
-        }
-
-        for (auto& worker : workers) worker.join();
     }
 
     void Network::apply_gradients()
     {
-        apply(hidden_weights, 4);
-        apply(hidden_biases, 4);
-        apply(output_weights, 4);
+        Trainer::apply_gradients(hidden_weights);
+        Trainer::apply_gradients(hidden_biases);
+        Trainer::apply_gradients(output_weights);
         output_bias.get(0).apply_gradient();
     }
 }
