@@ -16,7 +16,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "misc.h"
 #include <iostream>
 
 enum Color : uint8_t
@@ -58,7 +57,7 @@ std::ostream &operator<<(std::ostream &, Piece);
 
 inline Piece make_piece(PieceType type, Color color)
 {
-    return static_cast<Piece>(to_int(type) + (to_int(color) * 6));
+    return static_cast<Piece>(static_cast<uint8_t>(type) + (static_cast<uint8_t>(color) * 6));
 }
 
 inline Color color_of(Piece piece)
@@ -87,5 +86,5 @@ inline PieceType type_of(Piece piece)
 
 inline Color operator!(Color color)
 {
-    return static_cast<Color>(!to_int(color));
+    return static_cast<Color>(!static_cast<uint8_t>(color));
 }
