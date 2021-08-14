@@ -7,7 +7,7 @@
 
 namespace Trainer
 {
-    inline std::vector<Position> load_positions(std::string_view file, int limit = 0)
+    inline std::vector<Position> load_positions(std::string_view file, std::size_t limit = 0)
     {
         Position position;
         std::vector<Position> positions;
