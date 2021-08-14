@@ -18,7 +18,7 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
         {
             net.apply_gradients();
             double eps = i / (double)watch.elapsed_time().count() * 1000;
-            std::cout << "\rEvaluated [ " << i << " ]" << "EPS [ " << eps << " ] ";
+            std::cout << "\rEvaluated [ " << i << " ]" << " EPS [ " << eps << " ] ";
         }
 
         Trainer::InputVector sample;
@@ -30,7 +30,7 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
         cost += powf(net.get_output() - position.result, 2.0f);
     }
     
-    std::cout << "Cost: " << (cost / (double)positions.size()) << '\n';
+    std::cout << " Cost [ " << (cost / (double)positions.size()) << " ]\n";
 }
 
 int main()
