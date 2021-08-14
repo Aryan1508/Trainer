@@ -1,5 +1,6 @@
 #pragma once
 #include "piece.h"
+#include "Square.h"
 
 #include <array>
 #include <string_view>
