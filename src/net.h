@@ -8,18 +8,14 @@
 
 namespace Trainer
 {
-    constexpr int INPUT_SIZE  = 768;
-    constexpr int HIDDEN_SIZE = 256;
-
-    template<typename T, int X>
-    using ColVector = Matrix<T, X, 1>;
-
-    using HiddenVector = ColVector<Parameter, HIDDEN_SIZE>;
-    using OutputVector = ColVector<Parameter, 1>;
-
+    
     class Network
     {
     public:
+        static constexpr int INPUT_SIZE  = 768;
+        static constexpr int HIDDEN_SIZE = 256;
+        static constexpr int OUTPUT_SIZE = 1;
+
         Network();
 
         void save_network(std::string_view fil);
@@ -36,19 +32,20 @@ namespace Trainer
 
         float get_output() const
         {
-            return output_neuron.get(0).value;
+            return output_neuron.get(0);
         }
 
         void update_gradients(NetworkInput const& input);
         void apply_gradients();
 
-        HiddenVector  hidden_biases;
-        HiddenVector  hidden_neurons;
 
-        OutputVector output_bias;
-        OutputVector output_neuron;
+        Matrix<float, HIDDEN_SIZE, 1> hidden_neurons;
+        Matrix<float, OUTPUT_SIZE, 1> output_neuron;
 
-        ColMajorMatrix<Parameter, HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
-        ColMajorMatrix<Parameter,  1        , HIDDEN_SIZE>  output_weights;
+        Matrix<Parameter, OUTPUT_SIZE, 1> output_bias;
+        Matrix<Parameter, HIDDEN_SIZE, 1> hidden_biases;
+
+        Matrix<Parameter, HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
+        Matrix<Parameter, OUTPUT_SIZE, HIDDEN_SIZE>  output_weights;
     };
 }

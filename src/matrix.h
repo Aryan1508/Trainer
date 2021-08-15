@@ -7,7 +7,7 @@
 
 namespace Trainer
 {
-    template<typename T, int X, int Y, bool rowmajor = false> 
+    template<typename T, int X, int Y> 
     class Matrix
     {
     public:
@@ -15,12 +15,12 @@ namespace Trainer
 
         T& get(int row, int col)
         {
-            return rowmajor ? data[col * X + row] : data[row * Y + col];
+            return data[row * Y + col];
         }
 
         T const& get(int row, int col) const
         {
-            return rowmajor ? data[col * X + row] : data[row * Y + col];
+            return data[row * Y + col];
         }
 
         T& get(int i)
@@ -69,10 +69,4 @@ namespace Trainer
     private:
         std::array<T, X * Y> data;
     };
-
-    template<typename T, int X, int Y>
-    using RowMajorMatrix = Matrix<T, X, Y, true>;
-
-    template<typename T, int X, int Y>
-    using ColMajorMatrix = Matrix<T, X, Y, false>;
 }
