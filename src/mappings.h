@@ -4,10 +4,12 @@
 
 namespace Trainer
 {
-    void position_to_input(Position const& position, Matrix<Parameter, 768, 1>& mat, std::vector<int>& input_indices)
+    typedef std::vector<int> NetworkInput;
+
+    inline NetworkInput position_to_input(Position const& position)
     {
-        input_indices.reserve(32);
-        mat.set(Parameter());
+        NetworkInput indices;
+        indices.reserve(32);
 
         for (int j = 0; j < 64; j++)
         {
@@ -17,11 +19,9 @@ namespace Trainer
             {
                 Piece p = position.get_piece(Square(j));
                 int index = p * 64 + sq;
-
-                mat.get(index).value = 1.0f;
-
-                input_indices.push_back(index);
+                indices.push_back(index);
             }
         }
+        return indices;
     }
 }

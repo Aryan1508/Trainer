@@ -6,10 +6,10 @@ namespace Trainer
 {
     Network::Network()
     {
-        hidden_weights.randomize(InputVector::size());
-        hidden_biases .randomize(InputVector::size());
-        output_weights.randomize(HiddenVector::size());
-        output_bias   .randomize(HiddenVector::size());
+        hidden_weights.randomize(INPUT_SIZE);
+        hidden_biases .randomize(INPUT_SIZE);
+        output_weights.randomize(HIDDEN_SIZE);
+        output_bias   .randomize(HIDDEN_SIZE);
 
         hidden_neurons      .set(Parameter());
         output_neuron       .set(Parameter());
@@ -92,7 +92,7 @@ namespace Trainer
         }
     }
 
-    void Network::update_gradients(InputVector const& sample, float target)
+    void Network::update_gradients(NetworkInput const& sample, float target)
     {
         float error = (get_output() - target) * sigmoid_prime(get_output()) * 2;
 
@@ -101,15 +101,21 @@ namespace Trainer
             if (hidden_neurons.get(i).value > 0)
             {
                 float hidden_error = error * output_weights.get(i).value;
-
-                for (int j = 0; j < sample.total_rows(); j++)
-                {
-                    hidden_weights.get(i, j).gradient += hidden_error * sample.get(j).value;
-                }
                 output_weights.get(i).gradient += hidden_neurons.get(i).value * error;
                 hidden_biases.get(i).gradient += hidden_error;
             }
         }
+
+        for(auto activated_input_index : sample)
+        {
+            for(int i = 0;i < hidden_neurons.size();i++)
+            {
+                if (hidden_neurons.get(i).value > 0)
+                    hidden_weights.get(i, activated_input_index).gradient 
+                        += error * output_weights.get(i).value;
+            }
+        }
+
         output_bias.get(0).gradient += error;
     }
 

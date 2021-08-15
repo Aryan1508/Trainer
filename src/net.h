@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "matrix.h"
+#include "mappings.h"
 #include "optimize.h"
 #include "activation.h"	
 
@@ -13,7 +14,6 @@ namespace Trainer
     template<typename T, int X>
     using ColVector = Matrix<T, X, 1>;
 
-    using InputVector  = ColVector<Parameter, INPUT_SIZE>;
     using HiddenVector = ColVector<Parameter, HIDDEN_SIZE>;
     using OutputVector = ColVector<Parameter, 1>;
 
@@ -28,9 +28,9 @@ namespace Trainer
 
         void feed(std::vector<int> const& input_indices);
 
-        void back_propagate(InputVector const& sample, std::vector<int> const& input_indices, float target)
+        void back_propagate(NetworkInput const& sample, float target)
         {
-            feed(input_indices);
+            feed(sample);
             update_gradients(sample, target);
         }
 
@@ -39,7 +39,7 @@ namespace Trainer
             return output_neuron.get(0).value;
         }
 
-        void update_gradients(InputVector const& sample, float target);
+        void update_gradients(NetworkInput const& input, float target);
         void apply_gradients();
 
         HiddenVector  hidden_biases;
