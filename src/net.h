@@ -8,7 +8,7 @@
 namespace Trainer
 {
     constexpr int INPUT_SIZE  = 768;
-    constexpr int HIDDEN_SIZE = 16;
+    constexpr int HIDDEN_SIZE = 256;
 
     template<typename T, int X>
     using ColVector = Matrix<T, X, 1>;
