@@ -1,18 +1,17 @@
 #include "net.h"
 #include "reader.h"
-#include "mappings.h"
 #include "stopwatch.h"
 #include <memory>
 #include <iomanip>
 
-void fit(Trainer::Network& net, std::vector<Position>& positions)
+void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs)
 {
     int i = 0;
     StopWatch watch;
     watch.go();
 
     long double cost = 0;
-    for (auto const& position : positions)
+    for (auto const& input : inputs)
     {
         if (++i % 4096 == 0)
         {
@@ -21,13 +20,11 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
             std::cout << "\rEvaluated [ " << i << " ]" << " EPS [ " << eps << " ] ";
         }
 
-        auto sample = Trainer::position_to_input(position);
-
-        net.back_propagate(sample, position.result);
-        cost += powf(net.get_output() - position.result, 2.0f);
+        net.back_propagate(input);
+        cost += powf(net.get_output() - input.target, 2.0f);
     }
     
-    std::cout << " Cost [ " << (cost / (double)positions.size()) << " ]\n";
+    std::cout << " Cost [ " << (cost / (double)inputs.size()) << " ]\n";
 }
 
 int main()
@@ -37,7 +34,7 @@ int main()
     std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
     net->load_network("14_8_256h.nn");
 
-    auto positions = Trainer::load_positions("C:/tuning/lichess-big3.txt", 10000);
+    auto positions = Trainer::load_inputs("C:/tuning/lichess-big3.txt", 100000);
 
     for (int i = 0; i < 100000; i++)
     {

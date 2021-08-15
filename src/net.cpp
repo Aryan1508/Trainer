@@ -68,11 +68,11 @@ namespace Trainer
         fclose(f);
     }
 
-    void Network::feed(std::vector<int> const& input_indices)
+    void Network::feed(NetworkInput const& sample)
     {
         for (int i = 0; i < hidden_neurons.size(); i++) hidden_neurons.get(i).value = 0;
 
-        for (auto index : input_indices)
+        for (auto index : sample.activated_input_indices)
         {
             for (int i = 0; i < hidden_weights.total_rows(); i++)
                 hidden_neurons.get(i).value += hidden_weights.get(i, index).value;
@@ -92,9 +92,9 @@ namespace Trainer
         }
     }
 
-    void Network::update_gradients(NetworkInput const& sample, float target)
+    void Network::update_gradients(NetworkInput const& sample)
     {
-        float error = (get_output() - target) * sigmoid_prime(get_output()) * 2;
+        float error = (get_output() - sample.target) * sigmoid_prime(get_output()) * 2;
 
         for (int i = 0; i < hidden_neurons.size(); i++)
         {
@@ -106,7 +106,7 @@ namespace Trainer
             }
         }
 
-        for(auto activated_input_index : sample)
+        for(auto activated_input_index : sample.activated_input_indices)
         {
             for(int i = 0;i < hidden_neurons.size();i++)
             {

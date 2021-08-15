@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "matrix.h"
-#include "mappings.h"
+#include "reader.h"
 #include "optimize.h"
 #include "activation.h"	
 
@@ -26,12 +26,12 @@ namespace Trainer
         
         void load_network(std::string_view fil);
 
-        void feed(std::vector<int> const& input_indices);
+        void feed(NetworkInput const&);
 
-        void back_propagate(NetworkInput const& sample, float target)
+        void back_propagate(NetworkInput const& sample)
         {
             feed(sample);
-            update_gradients(sample, target);
+            update_gradients(sample);
         }
 
         float get_output() const
@@ -39,7 +39,7 @@ namespace Trainer
             return output_neuron.get(0).value;
         }
 
-        void update_gradients(NetworkInput const& input, float target);
+        void update_gradients(NetworkInput const& input);
         void apply_gradients();
 
         HiddenVector  hidden_biases;
