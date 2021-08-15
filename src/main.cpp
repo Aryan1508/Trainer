@@ -14,7 +14,7 @@ void fit(Trainer::Network& net, std::vector<Position>& positions)
     long double cost = 0;
     for (auto const& position : positions)
     {
-        if (++i % 16384 == 0)
+        if (++i % 4096 == 0)
         {
             net.apply_gradients();
             double eps = i / (double)watch.elapsed_time().count() * 1000;
@@ -39,7 +39,7 @@ int main()
 
     std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
     
-    auto positions = Trainer::load_positions("C:/tuning/lichess-big3.txt");
+    auto positions = Trainer::load_positions("C:/tuning/lichess-big3.txt", 10000);
 
     for (int i = 0; i < 100000; i++)
     {
