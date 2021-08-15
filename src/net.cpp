@@ -2,17 +2,33 @@
 #include <thread>
 #include <vector>
 
+namespace 
+{
+    template<int input_neuron_count, typename T> 
+    void randomize_matrix(T& matrix)
+    {
+        float g = 2 / sqrtf(static_cast<float>(input_neuron_count));
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<float> distrib(0.0f, g);
+
+        for(int i = 0;i < matrix.size();i++)
+            matrix.get(i) = distrib(gen);
+    }
+}
+
 namespace Trainer
 {
     Network::Network()
     {
-        hidden_weights.randomize(INPUT_SIZE);
-        hidden_biases .randomize(INPUT_SIZE);
-        output_weights.randomize(HIDDEN_SIZE);
-        output_bias   .randomize(HIDDEN_SIZE);
+        randomize_matrix<INPUT_SIZE>(hidden_weights);
+        randomize_matrix<INPUT_SIZE>(hidden_biases);
+        randomize_matrix<HIDDEN_SIZE>(output_weights);
+        randomize_matrix<HIDDEN_SIZE>(output_bias);
 
-        hidden_neurons      .set(Parameter());
-        output_neuron       .set(Parameter());
+        hidden_neurons.set(0.0f);
+        output_neuron .set(0.0f);
     }
 
     void Network::save_network(std::string_view path)
@@ -70,26 +86,21 @@ namespace Trainer
 
     void Network::feed(NetworkInput const& sample)
     {
-        for (int i = 0; i < hidden_neurons.size(); i++) hidden_neurons.get(i).value = 0;
+        hidden_neurons.set(0.0f);
 
         for (auto index : sample.activated_input_indices)
         {
             for (int i = 0; i < hidden_weights.total_rows(); i++)
-                hidden_neurons.get(i).value += hidden_weights.get(i, index).value;
+                hidden_neurons.get(i) += hidden_weights.get(i, index);
         }
 
         for (int i = 0; i < hidden_neurons.size(); i++)
-            hidden_neurons.get(i).value = relu(hidden_neurons.get(i).value + hidden_biases.get(i).value);
+            hidden_neurons.get(i) = relu(hidden_neurons.get(i) + hidden_biases.get(i));
 
-        for (int i = 0; i < output_weights.total_rows(); i++)
-        {
-            float sum = 0;
+        for (int k = 0; k < output_weights.total_cols(); k++)
+            output_neuron.get(0) +=  hidden_neurons.get(k) * output_weights.get(k);
 
-            for (int k = 0; k < output_weights.total_cols(); k++)
-                sum += output_weights.get(i, k).value * hidden_neurons.get(k).value;
-
-            output_neuron.get(i).value = sigmoid(sum + output_bias.get(i).value);
-        }
+        output_neuron.get(0) = sigmoid(output_neuron.get(0) + output_bias.get(0));
     }
 
     void Network::update_gradients(NetworkInput const& sample)
@@ -98,11 +109,11 @@ namespace Trainer
 
         for (int i = 0; i < hidden_neurons.size(); i++)
         {
-            if (hidden_neurons.get(i).value > 0)
+            if (hidden_neurons.get(i) > 0)
             {
-                float hidden_error = error * output_weights.get(i).value;
-                output_weights.get(i).gradient += hidden_neurons.get(i).value * error;
-                hidden_biases.get(i).gradient += hidden_error;
+                float hidden_error = error * output_weights.get(i);
+                output_weights.get(i).update_gradient(hidden_neurons.get(i) * error);
+                hidden_biases.get(i).update_gradient(hidden_error);
             }
         }
 
@@ -110,13 +121,12 @@ namespace Trainer
         {
             for(int i = 0;i < hidden_neurons.size();i++)
             {
-                if (hidden_neurons.get(i).value > 0)
-                    hidden_weights.get(i, activated_input_index).gradient 
-                        += error * output_weights.get(i).value;
+                if (hidden_neurons.get(i) > 0)
+                    hidden_weights.get(i, activated_input_index).update_gradient(error * output_weights.get(i));
             }
         }
 
-        output_bias.get(0).gradient += error;
+        output_bias.get(0).update_gradient(error);
     }
 
     template<typename T>

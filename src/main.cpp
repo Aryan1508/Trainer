@@ -32,7 +32,6 @@ int main()
     std::cout << std::fixed << std::setprecision(8);
 
     std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
-    net->load_network("14_8_256h.nn");
 
     auto positions = Trainer::load_inputs("C:/tuning/lichess-big3.txt", 100000);
 
