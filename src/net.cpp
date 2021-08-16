@@ -136,7 +136,7 @@ namespace Trainer
     void apply_gradients(T1& values, T2& gradients)
     {
         for (int i = 0; i < values.size(); i++)
-            values.get(i) -= gradients.get(i).get_final_gradient();
+            values.get(i) += gradients.get(i).get_final_gradient();
     }
 
     void Network::apply_gradients()
