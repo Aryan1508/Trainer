@@ -7,7 +7,9 @@
 
 namespace Trainer
 {
-    template<typename T, int X, int Y> 
+    enum class Arrangement { RowMajor, ColMajor };
+
+    template<typename T, int X, int Y, Arrangement A = Arrangement::RowMajor> 
     class Matrix
     {
     public:
@@ -15,12 +17,12 @@ namespace Trainer
 
         T& get(int row, int col)
         {
-            return data[row * Y + col];
+            return A == Arrangement::RowMajor ? data[row * Y + col] : data[col * X + row];
         }
 
         T const& get(int row, int col) const
         {
-            return data[row * Y + col];
+            return A == Arrangement::RowMajor ? data[row * Y + col] : data[col * X + row];
         }
 
         T& get(int i)

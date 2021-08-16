@@ -45,11 +45,11 @@ namespace Trainer
 
         fwrite(&count, sizeof(uint64_t), 1, f);
 
-        fwrite(hidden_weights.raw(), sizeof(Parameter), hidden_weights.size(), f);
-        fwrite(output_weights.raw(), sizeof(Parameter), output_weights.size(), f);
+        fwrite(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
+        fwrite(output_weights.raw(), sizeof(float), output_weights.size(), f);
 
-        fwrite(hidden_biases.raw(), sizeof(Parameter), hidden_biases.size(), f);
-        fwrite(output_bias.raw(), sizeof(Parameter), output_bias.size(), f);
+        fwrite(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
+        fwrite(output_bias.raw(), sizeof(float), output_bias.size(), f);
 
         fclose(f);
     }
@@ -75,11 +75,11 @@ namespace Trainer
             std::terminate();
         }
 
-        fread(hidden_weights.raw(), sizeof(Parameter), hidden_weights.size(), f);
-        fread(output_weights.raw(), sizeof(Parameter), output_weights.size(), f);
+        fread(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
+        fread(output_weights.raw(), sizeof(float), output_weights.size(), f);
 
-        fread(hidden_biases.raw(), sizeof(Parameter), hidden_biases.size(), f);
-        fread(output_bias.raw(), sizeof(Parameter), output_bias.size(), f);
+        fread(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
+        fread(output_bias.raw(), sizeof(float), output_bias.size(), f);
 
         fclose(f);
     }
@@ -114,8 +114,9 @@ namespace Trainer
             if (hidden_neurons.get(i) > 0)
             {
                 float hidden_error = error * output_weights.get(i);
-                output_weights.get(i).update_gradient(hidden_neurons.get(i) * error);
-                hidden_biases.get(i).update_gradient(hidden_error);
+
+                output_weight_gradients.get(i).update_gradient(hidden_neurons.get(i) * error);
+                hidden_bias_gradients.get(i).update_gradient(hidden_error);
             }
         }
 
@@ -124,25 +125,25 @@ namespace Trainer
             for(int i = 0;i < hidden_neurons.size();i++)
             {
                 if (hidden_neurons.get(i) > 0)
-                    hidden_weights.get(i, activated_input_index).update_gradient(error * output_weights.get(i));
+                    hidden_weight_gradients.get(i, activated_input_index).update_gradient(error * output_weights.get(i));
             }
         }
 
-        output_bias.get(0).update_gradient(error);
+        output_bias_gradient.get(0).update_gradient(error);
     }
 
-    template<typename T>
-    void apply_gradients(T& matrix)
+    template<typename T1, typename T2>
+    void apply_gradients(T1& values, T2& gradients)
     {
-        for (int i = 0; i < matrix.size(); i++)
-            matrix.get(i).apply_gradient();
+        for (int i = 0; i < values.size(); i++)
+            values.get(i) += gradients.get(i).get_final_gradient();
     }
 
     void Network::apply_gradients()
     {
-        Trainer::apply_gradients(hidden_weights);
-        Trainer::apply_gradients(hidden_biases);
-        Trainer::apply_gradients(output_weights);
-        output_bias.get(0).apply_gradient();
+        Trainer::apply_gradients(hidden_weights, hidden_weight_gradients);
+        Trainer::apply_gradients(hidden_biases, hidden_bias_gradients);
+        Trainer::apply_gradients(output_weights, output_weight_gradients);
+        Trainer::apply_gradients(output_bias, output_bias_gradient);
     }
 }
