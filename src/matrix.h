@@ -40,15 +40,6 @@ namespace Trainer
             std::fill(data.begin(), data.end(), val);
         }
 
-        void randomize(int inputs)
-        {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::normal_distribution<float> distrib(0.0f, 2 / sqrtf((float)inputs));
-
-            for (auto& val : data) val = distrib(gen);
-        }
-
         T* raw()
         {
             return &data[0];
