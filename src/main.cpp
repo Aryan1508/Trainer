@@ -13,7 +13,7 @@ void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs)
     long double cost = 0;
     for (auto const& input : inputs)
     {
-        if (++i % 4096 == 0)
+        if (++i % 16384 == 0)
         {
             net.apply_gradients();
             double eps = i / (double)watch.elapsed_time().count() * 1000;
