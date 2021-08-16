@@ -51,7 +51,7 @@ namespace Trainer
         Matrix<Parameter, OUTPUT_SIZE, 1> output_bias_gradient;
         Matrix<Parameter, HIDDEN_SIZE, 1> hidden_bias_gradients;
 
-        Matrix<Parameter, HIDDEN_SIZE, INPUT_SIZE>  hidden_weight_gradients;
+        Matrix<Parameter, HIDDEN_SIZE, INPUT_SIZE, Arrangement::ColMajor>  hidden_weight_gradients;
         Matrix<Parameter, OUTPUT_SIZE, HIDDEN_SIZE> output_weight_gradients;
     };
 }
