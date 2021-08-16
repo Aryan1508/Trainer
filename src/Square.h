@@ -1,20 +1,3 @@
-/*
-  Bit-Genie is an open-source, UCI-compliant chess engine written by
-  Aryan Parekh - https://github.com/Aryan1508/Bit-Genie
-
-  Bit-Genie is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  Bit-Genie is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 #pragma once
 #include "piece.h"
 #include <string_view>
@@ -30,14 +13,6 @@ enum Square : uint8_t
     A7, B7, C7, D7, E7, F7, G7, H7,
     A8, B8, C8, D8, E8, F8, G8, H8,
     bad_sq = 100,
-};
-
-enum class Direction : int8_t
-{
-    north = 8,
-    south = -8,
-    east = 1,
-    west = -1,
 };
 
 inline Square flip_square(const Square sq)
