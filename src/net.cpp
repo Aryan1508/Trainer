@@ -97,6 +97,8 @@ namespace Trainer
         for (int i = 0; i < hidden_neurons.size(); i++)
             hidden_neurons.get(i) = relu(hidden_neurons.get(i) + hidden_biases.get(i));
 
+        output_neuron.set(0.0f);
+
         for (int k = 0; k < output_weights.total_cols(); k++)
             output_neuron.get(0) +=  hidden_neurons.get(k) * output_weights.get(k);
 
