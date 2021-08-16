@@ -45,7 +45,7 @@ namespace Trainer
         Matrix<float, OUTPUT_SIZE, 1> output_bias;
         Matrix<float, HIDDEN_SIZE, 1> hidden_biases;
 
-        Matrix<float, HIDDEN_SIZE, INPUT_SIZE>   hidden_weights;
+        Matrix<float, HIDDEN_SIZE, INPUT_SIZE, Arrangement::ColMajor>   hidden_weights;
         Matrix<float, OUTPUT_SIZE, HIDDEN_SIZE>  output_weights;
 
         Matrix<Parameter, OUTPUT_SIZE, 1> output_bias_gradient;
