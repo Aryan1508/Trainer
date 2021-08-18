@@ -21,7 +21,7 @@ void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs)
         }
 
         net.back_propagate(input);
-        cost += powf(net.get_output() - input.target, 2.0f);
+        cost += net.get_cost(input);
     }
     
     std::cout << " Cost [ " << (cost / (double)inputs.size()) << " ]\n";
@@ -31,12 +31,13 @@ int main()
 {
     std::cout << std::fixed << std::setprecision(8);
 
-    std::unique_ptr<Trainer::Network> net = std::make_unique<Trainer::Network>();
+    auto net = std::make_unique<Trainer::Network>();
 
-    auto positions = Trainer::load_inputs("C:/tuning/lichess-big3.txt", 100000);
+    auto positions = Trainer::load_inputs("C:/tuning/koi-6.15-d10.book");
 
-    for (int i = 0; i < 100000; i++)
+    for (int i = 0; i < 100; i++)
     {
         fit(*net, positions);
+        net->save_network("a33e3d1337.nn");
     }
 }

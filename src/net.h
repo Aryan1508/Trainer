@@ -13,7 +13,7 @@ namespace Trainer
     {
     public:
         static constexpr int INPUT_SIZE  = 768;
-        static constexpr int HIDDEN_SIZE = 512;
+        static constexpr int HIDDEN_SIZE = 128;
         static constexpr int OUTPUT_SIZE = 1;
 
         Network();
@@ -34,10 +34,15 @@ namespace Trainer
         {
             return output_neuron.get(0);
         }
+        
+        float get_cost(NetworkInput const& sample)
+        {
+            float o = get_output();
+            return powf(sample.target - o, 2.0f) * 0.5f + powf(sample.eval_target - o, 2.0f) * 0.5f;
+        }
 
         void update_gradients(NetworkInput const& input);
         void apply_gradients();
-
 
         Matrix<float, HIDDEN_SIZE, 1> hidden_neurons;
         Matrix<float, OUTPUT_SIZE, 1> output_neuron;

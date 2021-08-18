@@ -1,5 +1,6 @@
 #pragma once
 #include "position.h"
+#include "activation.h"
 
 #include <string>
 #include <vector>
@@ -10,7 +11,7 @@ namespace Trainer
     struct NetworkInput
     {
         std::vector<int> activated_input_indices;
-        float target = 0;
+        float target = 0, eval_target = 0;
     };
 
     inline NetworkInput position_to_input(Position const& position)
@@ -28,6 +29,7 @@ namespace Trainer
                 input.activated_input_indices.push_back(index);
             }
         }
+        
         return input;
     }
 
@@ -55,14 +57,17 @@ namespace Trainer
 
             if (line.find("[1.0]") != line.npos)        input.target = 1.0;
             else if (line.find("[0.0]") != line.npos)   input.target = 0.0;
-            else                                        input.target = 0.5;
+            else if (line.find("[0.5]") != line.npos)   input.target = 0.5;
+            else break;
 
+            input.eval_target = sigmoid(std::stoi(line.substr(line.find("]") + 1)));
             inputs.push_back(input);
 
             if (inputs.size() % 4096 == 0)
-                std::cerr << "\rLoading inputs [" << inputs.size() << "]" << std::flush;
+                std::cout << "\rLoading inputs [" << inputs.size() << "]" << std::flush;
         }
         fil.close();
+        std::cout << "\rLoading inputs [" << inputs.size() << "]" << std::flush;
         std::cout << std::endl;
 
         return inputs;

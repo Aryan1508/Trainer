@@ -8,7 +8,8 @@
 class Position
 {
 public:
-    std::array<Piece, 64> pieces; 
+    std::array<Piece, 64> pieces;
+    bool  white_to_play = false; 
     float result = 0;
     
     Position();

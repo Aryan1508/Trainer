@@ -107,7 +107,9 @@ namespace Trainer
 
     void Network::update_gradients(NetworkInput const& sample)
     {
-        float error = (get_output() - sample.target) * sigmoid_prime(get_output()) * 2;
+        float cost_d = 2.0f * 0.5f * (get_output() - sample.target);
+        cost_d += 2.0f * 0.5f * (get_output() - sample.eval_target);
+        float error = cost_d * sigmoid_prime(get_output());
 
         for (int i = 0; i < hidden_neurons.size(); i++)
         {
