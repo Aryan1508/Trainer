@@ -5,7 +5,7 @@
 namespace 
 {
     template<int input_neuron_count, typename T> 
-    void randomize_matrix(T& matrix)
+    void randomize_matrix_hidden(T& matrix)
     {
         float g = 2 / sqrtf(static_cast<float>(input_neuron_count));
 
@@ -16,16 +16,29 @@ namespace
         for(int i = 0;i < matrix.size();i++)
             matrix.get(i) = distrib(gen);
     }
+
+    template<int input_neuron_count, int output_neuron_count, typename T> 
+    void randomize_matrix_output(T& matrix)
+    {
+        float g = sqrtf(6) / sqrtf(input_neuron_count + output_neuron_count);
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> distrib(-g, g);
+
+        for(int i = 0;i < matrix.size();i++)
+            matrix.get(i) = distrib(gen);
+    }
 }
 
 namespace Trainer
 {
     Network::Network()
     {
-        randomize_matrix<INPUT_SIZE>(hidden_weights);
-        randomize_matrix<INPUT_SIZE>(hidden_biases);
-        randomize_matrix<HIDDEN_SIZE>(output_weights);
-        randomize_matrix<HIDDEN_SIZE>(output_bias);
+        randomize_matrix_hidden<INPUT_SIZE>(hidden_weights);
+        randomize_matrix_hidden<INPUT_SIZE>(hidden_biases);
+        randomize_matrix_output<HIDDEN_SIZE, OUTPUT_SIZE>(output_weights);
+        randomize_matrix_output<HIDDEN_SIZE, OUTPUT_SIZE>(output_bias);
 
         hidden_neurons.set(0.0f);
         output_neuron .set(0.0f);
@@ -72,6 +85,8 @@ namespace Trainer
         if (count != fileCount)
         {
             std::cerr << "Error loading network" << std::endl;
+            std::cout << "Count: " << count << '\n';
+            std::cout << "File count: " << fileCount << '\n';
             std::terminate();
         }
 

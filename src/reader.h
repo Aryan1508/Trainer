@@ -10,14 +10,15 @@ namespace Trainer
 {
     struct NetworkInput
     {
-        std::vector<int> activated_input_indices;
-        float target = 0, eval_target = 0;
+        std::vector<uint16_t> activated_input_indices;
+        float target = 0;
+        float eval_target = 0;
     };
 
     inline NetworkInput position_to_input(Position const& position)
     {
         NetworkInput input;
-
+        
         for (int j = 0; j < 64; j++)
         {
             Square sq = Square(j);
@@ -37,7 +38,7 @@ namespace Trainer
     {
         Position position;
         std::vector<NetworkInput> inputs;
-
+        
         std::ifstream fil(file.data());
 
         if (!fil)
@@ -55,15 +56,22 @@ namespace Trainer
             
             NetworkInput input = position_to_input(position);
 
-            if (line.find("[1.0]") != line.npos)        input.target = 1.0;
-            else if (line.find("[0.0]") != line.npos)   input.target = 0.0;
-            else if (line.find("[0.5]") != line.npos)   input.target = 0.5;
+            if (line.find("1.0") != line.npos)        input.target = 1.0;
+            else if (line.find("0.0") != line.npos)   input.target = 0.0;
+            else if (line.find("0.5") != line.npos)   input.target = 0.5;
             else break;
 
-            input.eval_target = sigmoid(std::stoi(line.substr(line.find("]") + 1)));
+            int score = std::stoi(line.substr(line.find("]") + 1));
+
+            if (std::abs(score) >= 30000)
+                continue;
+
+            score = std::clamp(score, -2000, 2000);
+
+            input.eval_target = sigmoid(score);
             inputs.push_back(input);
 
-            if (inputs.size() % 4096 == 0)
+            if (inputs.size() % (16384 * 2) == 0)
                 std::cout << "\rLoading inputs [" << inputs.size() << "]" << std::flush;
         }
         fil.close();

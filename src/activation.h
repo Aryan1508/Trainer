@@ -4,11 +4,11 @@
 
 namespace Trainer
 {
-    constexpr float sigmoid_scale = 2.5f / 400.0f;
+    constexpr float sigmoid_scale = 2.0f / 400.0f;
 
     inline float sigmoid(float x)
     {
-        return 1.0f / (1.0f + expf(-sigmoid_scale * x));
+        return 1.0f / (1.0f + expf(sigmoid_scale * -x));
     }
 
     inline float sigmoid_prime(float x)

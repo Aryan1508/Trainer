@@ -4,7 +4,7 @@
 #include <memory>
 #include <iomanip>
 
-void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs)
+void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs, int epoch)
 {
     int i = 0;
     StopWatch watch;
@@ -17,7 +17,7 @@ void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs)
         {
             net.apply_gradients();
             double eps = i / (double)watch.elapsed_time().count() * 1000;
-            std::cout << "\rEvaluated [ " << i << " ]" << " EPS [ " << eps << " ] ";
+            std::cout << "\rEpoch #" << epoch << " Evaluated [ " << i << " ]" << " EPS [ " << eps << " ] ";
         }
 
         net.back_propagate(input);
@@ -33,11 +33,12 @@ int main()
 
     auto net = std::make_unique<Trainer::Network>();
 
-    auto positions = Trainer::load_inputs("C:/tuning/koi-6.15-d10.book");
+    // net->load_network("C:/tuning/Networks/6cc93122c1.nn");
+    auto positions = Trainer::load_inputs("C:/tuning/8b5ed5872e.txt", 1000000);
 
     for (int i = 0; i < 100; i++)
     {
-        fit(*net, positions);
-        net->save_network("a33e3d1337.nn");
+        fit(*net, positions, i); 
+        // net->save_network("1ad5139e50.nn");
     }
 }
