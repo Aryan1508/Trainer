@@ -18,7 +18,8 @@ namespace Trainer
     inline NetworkInput position_to_input(Position const& position)
     {
         NetworkInput input;
-        
+
+        input.activated_input_indices.reserve(32);
         for (int j = 0; j < 64; j++)
         {
             Square sq = Square(j);
@@ -30,6 +31,7 @@ namespace Trainer
                 input.activated_input_indices.push_back(index);
             }
         }
+        input.activated_input_indices.shrink_to_fit();
         
         return input;
     }
@@ -38,6 +40,7 @@ namespace Trainer
     {
         Position position;
         std::vector<NetworkInput> inputs;
+        inputs.reserve(limit);
         
         std::ifstream fil(file.data());
 
@@ -72,9 +75,13 @@ namespace Trainer
             inputs.push_back(input);
 
             if (inputs.size() % (16384 * 2) == 0)
+            {
                 std::cout << "\rLoading inputs [" << inputs.size() << "]" << std::flush;
+            }
         }
         fil.close();
+        inputs.shrink_to_fit();
+
         std::cout << "\rLoading inputs [" << inputs.size() << "]" << std::flush;
         std::cout << std::endl;
 

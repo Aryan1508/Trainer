@@ -32,13 +32,12 @@ int main()
     std::cout << std::fixed << std::setprecision(8);
 
     auto net = std::make_unique<Trainer::Network>();
+    
+    auto positions = Trainer::load_inputs("C:/tuning/8b5ed5872e.txt", 50000000);
 
-    // net->load_network("C:/tuning/Networks/6cc93122c1.nn");
-    auto positions = Trainer::load_inputs("C:/tuning/8b5ed5872e.txt", 1000000);
-
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 200; i++)
     {
         fit(*net, positions, i); 
-        // net->save_network("1ad5139e50.nn");
+        net->save_network("d01140c59b.nn");
     }
 }
