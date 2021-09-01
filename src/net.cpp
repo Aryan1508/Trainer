@@ -1,166 +1,102 @@
 #include "net.h"
+#include "sample.h"
+
 #include <thread>
 #include <vector>
 
-namespace 
-{
-    template<int input_neuron_count, typename T> 
-    void randomize_matrix_hidden(T& matrix)
-    {
-        float g = 2 / sqrtf(static_cast<float>(input_neuron_count));
-
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::normal_distribution<float> distrib(0.0f, g);
-
-        for(int i = 0;i < matrix.size();i++)
-            matrix.get(i) = distrib(gen);
-    }
-
-    template<int input_neuron_count, int output_neuron_count, typename T> 
-    void randomize_matrix_output(T& matrix)
-    {
-        float g = sqrtf(6) / sqrtf(input_neuron_count + output_neuron_count);
-
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> distrib(-g, g);
-
-        for(int i = 0;i < matrix.size();i++)
-            matrix.get(i) = distrib(gen);
-    }
-}
-
 namespace Trainer
 {
-    Network::Network()
+    Network::Network(std::vector<int> const& topology)
     {
-        randomize_matrix_hidden<INPUT_SIZE>(hidden_weights);
-        randomize_matrix_hidden<INPUT_SIZE>(hidden_biases);
-        randomize_matrix_output<HIDDEN_SIZE, OUTPUT_SIZE>(output_weights);
-        randomize_matrix_output<HIDDEN_SIZE, OUTPUT_SIZE>(output_bias);
-
-        hidden_neurons.set(0.0f);
-        output_neuron .set(0.0f);
-    }
-
-    void Network::save_network(std::string_view path)
-    {
-        const char* p = path.data();
-        FILE* f = fopen(p, "wb");
-
-        uint64_t count = 0;
-
-        count += hidden_weights.size();
-        count += output_weights.size();
-        count += hidden_biases.size();
-        count += output_bias.size();
-
-        fwrite(&count, sizeof(uint64_t), 1, f);
-
-        fwrite(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
-        fwrite(output_weights.raw(), sizeof(float), output_weights.size(), f);
-
-        fwrite(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
-        fwrite(output_bias.raw(), sizeof(float), output_bias.size(), f);
-
-        fclose(f);
-    }
-
-    void Network::load_network(std::string_view path)
-    {
-        const char* p = path.data();
-        FILE* f = fopen(p, "rb");
-
-        uint64_t count = 0;
-
-        count += hidden_weights.size();
-        count += output_weights.size();
-        count += hidden_biases.size();
-        count += output_bias.size();
-
-        uint64_t fileCount = 0;
-        fread(&fileCount, sizeof(uint64_t), 1, f);
-
-        if (count != fileCount)
+        for(std::size_t i = 1;i < topology.size();i++)
         {
-            std::cerr << "Error loading network" << std::endl;
-            std::cout << "Count: " << count << '\n';
-            std::cout << "File count: " << fileCount << '\n';
-            std::terminate();
+            const int output_size = topology[i];
+            const int input_size  = topology[i - 1];
+
+            neurons.push_back(Matrix<float>(output_size));
+            biases.push_back(Matrix<float>(output_size));
+
+            weights.push_back(Matrix<float>(output_size, input_size));
+            
+            weight_gradients.push_back(Matrix<Parameter>(output_size, input_size));
+            bias_gradients.push_back(Matrix<Parameter>(output_size));
+        }
+    }
+
+    void Network::feed(Sample const& sample)
+    {
+        neurons[0].set_zero();
+
+        for (auto index : sample.input.indices)
+        {
+            for (int i = 0; i < neurons[0].rows(); i++)
+                neurons[0](i) += weights[0](i, index);
         }
 
-        fread(hidden_weights.raw(), sizeof(float), hidden_weights.size(), f);
-        fread(output_weights.raw(), sizeof(float), output_weights.size(), f);
+        for (int i = 0; i < neurons[1].size(); i++)
+            neurons[0](i) = relu(neurons[0](i) + biases[0](i));
 
-        fread(hidden_biases.raw(), sizeof(float), hidden_biases.size(), f);
-        fread(output_bias.raw(), sizeof(float), output_bias.size(), f);
-
-        fclose(f);
-    }
-
-    void Network::feed(NetworkInput const& sample)
-    {
-        hidden_neurons.set(0.0f);
-
-        for (auto index : sample.activated_input_indices)
+        for(std::size_t i = 1;i < neurons.size();i++)
         {
-            for (int i = 0; i < hidden_weights.total_rows(); i++)
-                hidden_neurons.get(i) += hidden_weights.get(i, index);
+            auto const& input   = neurons[i - 1];
+            auto const& weight  = weights[i];
+            auto const& bias    = biases[i];
+            auto& output  = neurons[i];
+
+            for(int i = 0;i < output.size();i++)
+            {
+                output(i) = 0.0f;
+
+                for(int j = 0;j < input.size();j++)
+                {
+                    output(i) += input(j) * weight(i, j);
+                }
+                output(i) = sigmoid(output(i) + bias(i));
+            }
         }
-
-        for (int i = 0; i < hidden_neurons.size(); i++)
-            hidden_neurons.get(i) = relu(hidden_neurons.get(i) + hidden_biases.get(i));
-
-        output_neuron.set(0.0f);
-
-        for (int k = 0; k < output_weights.total_cols(); k++)
-            output_neuron.get(0) +=  hidden_neurons.get(k) * output_weights.get(k);
-
-        output_neuron.get(0) = sigmoid(output_neuron.get(0) + output_bias.get(0));
     }
 
-    void Network::update_gradients(NetworkInput const& sample)
+    void Network::update_gradients(Sample const& sample)
     {
-        float cost_d = 2.0f * 0.5f * (get_output() - sample.target);
+        float cost_d = 2.0f * 0.5f * (get_output() - sample.wdl_target);
         cost_d += 2.0f * 0.5f * (get_output() - sample.eval_target);
         float error = cost_d * sigmoid_prime(get_output());
 
-        for (int i = 0; i < hidden_neurons.size(); i++)
+        for (int i = 0; i < neurons[0].size(); i++)
         {
-            if (hidden_neurons.get(i) > 0)
+            if (neurons[0](i) > 0)
             {
-                float hidden_error = error * output_weights.get(i);
+                float hidden_error = error * weights[1](i);
 
-                output_weight_gradients.get(i).update_gradient(hidden_neurons.get(i) * error);
-                hidden_bias_gradients.get(i).update_gradient(hidden_error);
+                weight_gradients[1](i).update_gradient(neurons[0](i) * error);
+                bias_gradients[0](i).update_gradient(hidden_error);
             }
         }
 
-        for(auto activated_input_index : sample.activated_input_indices)
+        for(auto activated_input_index : sample.input.indices)
         {
-            for(int i = 0;i < hidden_neurons.size();i++)
+            for(int i = 0;i < neurons[0].size();i++)
             {
-                if (hidden_neurons.get(i) > 0)
-                    hidden_weight_gradients.get(i, activated_input_index).update_gradient(error * output_weights.get(i));
+                if (neurons[0](i) > 0)
+                    weight_gradients[0](i, activated_input_index).update_gradient(error * weights[1](i));
             }
         }
 
-        output_bias_gradient.get(0).update_gradient(error);
+        bias_gradients[1](0).update_gradient(error);
     }
 
     template<typename T1, typename T2>
     void apply_gradients(T1& values, T2& gradients)
     {
         for (int i = 0; i < values.size(); i++)
-            values.get(i) += gradients.get(i).get_final_gradient();
+            values(i) += gradients(i).get_final_gradient();
     }
 
     void Network::apply_gradients()
     {
-        Trainer::apply_gradients(hidden_weights, hidden_weight_gradients);
-        Trainer::apply_gradients(hidden_biases, hidden_bias_gradients);
-        Trainer::apply_gradients(output_weights, output_weight_gradients);
-        Trainer::apply_gradients(output_bias, output_bias_gradient);
+        Trainer::apply_gradients(weights[0], weight_gradients[0]);
+        Trainer::apply_gradients(biases[0], bias_gradients[0]);
+        Trainer::apply_gradients(weights[1], weight_gradients[1]);
+        Trainer::apply_gradients(biases[1], bias_gradients[1]);
     }
 }

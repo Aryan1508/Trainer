@@ -1,10 +1,11 @@
 #include "net.h"
-#include "reader.h"
+#include "sample.h"
 #include "stopwatch.h"
 #include <memory>
 #include <iomanip>
+#include <iostream>
 
-void fit(Trainer::Network& net, std::vector<Trainer::NetworkInput>& inputs, int epoch)
+void fit(Trainer::Network& net, std::vector<Trainer::Sample>& inputs, int epoch)
 {
     int i = 0;
     StopWatch watch;
@@ -31,13 +32,12 @@ int main()
 {
     std::cout << std::fixed << std::setprecision(8);
 
-    auto net = std::make_unique<Trainer::Network>();
+    auto net = std::unique_ptr<Trainer::Network>(new Trainer::Network({768, 128, 1}));
     
-    auto positions = Trainer::load_inputs("C:/tuning/8b5ed5872e.txt", 50000000);
+    auto positions = Trainer::load_inputs("C:/tuning/8b5ed5872e.txt", 2000000);
 
     for (int i = 0; i < 200; i++)
     {
         fit(*net, positions, i); 
-        net->save_network("d01140c59b.nn");
     }
 }

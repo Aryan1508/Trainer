@@ -1,65 +1,127 @@
 #pragma once
-#include <array>
 #include <random>
 #include <cassert>
-#include <iostream>
-#include <algorithm>
+#include <cstring>
 
 namespace Trainer
 {
-    enum class Arrangement { RowMajor, ColMajor };
-
-    template<typename T, int X, int Y, Arrangement A = Arrangement::RowMajor> 
+    template<typename T> 
     class Matrix
     {
     public:
         Matrix() = default;
 
-        T& get(int row, int col)
+        explicit Matrix(int size) 
         {
-            return A == Arrangement::RowMajor ? data[row * Y + col] : data[col * X + row];
+            create(size, 1);
         }
 
-        T const& get(int row, int col) const
+        Matrix(int rows, int cols)
         {
-            return A == Arrangement::RowMajor ? data[row * Y + col] : data[col * X + row];
+            create(rows, cols);
         }
 
-        T& get(int i)
+        Matrix(Matrix const& rhs) 
         {
-            return data[i];
+            create(rhs.row_count, rhs.col_count);
+            std::memcpy(data, rhs.data, sizeof(T) * rhs.size());
         }
 
-        T const& get(int i) const
+        void operator=(Matrix const& rhs) 
         {
-            return data[i];
+            assert(has_same_dimensions(rhs));
+            std::memcpy(data, rhs.data, sizeof(T) * rhs.size());
         }
 
-        void set(T const& val)
+        void resize(int rows, int cols)
         {
-            std::fill(data.begin(), data.end(), val);
+            delete[] data;
+            create(rows, cols);
+        }
+
+        ~Matrix() 
+        {
+            delete[] data;
+        }
+
+        void set_zero()
+        {
+            std::memset(data, 0, sizeof(T) * size());
+        }
+
+        T& operator()(const int index)
+        {
+            assert(index < size());
+            return data[index];
+        }
+
+        T const& operator()(const int index) const
+        {
+            assert(index < size());
+            return data[index];
+        }
+
+        T& operator()(const int row, const int col)
+        {
+            assert(row < row_count && col < col_count);
+            return data[col * row_count + row];
+            // return data[row * col_count + col];
+        }
+
+        T const& operator()(const int row, const int col) const
+        {
+            assert(row < row_count && col < col_count);
+            return data[col * row_count + row];
+            // return data[row * col_count + col];
         }
 
         T* raw()
         {
-            return &data[0];
+            return data;
         }
 
-        static constexpr int total_rows() 
+        int rows() const 
         {
-            return X;
+            return row_count;
         }
 
-        static constexpr int total_cols() 
+        int cols() const 
         {
-            return Y;
+            return col_count;
         }
 
-        static constexpr int size() 
+        int size() const
         {
-            return static_cast<int>(X * Y);
+            return row_count * col_count;
+        }
+
+        bool has_same_dimensions(Matrix const& rhs) const
+        {
+            return row_count == rhs.row_count && col_count == rhs.col_count;
+        }
+
+        void he_init(const int n)
+        {
+            const float g = 2.0f / sqrtf(static_cast<float>(n));
+
+            std::random_device rd;
+            std::normal_distribution<float> distrib(0.0f, g);
+            std::mt19937 rng(12345);
+
+            for(int i = 0;i < size();i++)
+                this->operator()(i) = distrib(rng);
         }
     private:
-        std::array<T, X * Y> data;
+        void create(int rows, int cols)
+        {
+            row_count = rows;
+            col_count = cols;
+            data = new T[row_count * col_count];
+            he_init(768);
+        }
+
+        T* data = nullptr;
+        int    row_count;
+        int    col_count;
     };
 }

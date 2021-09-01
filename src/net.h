@@ -1,13 +1,13 @@
 #pragma once
 #include <vector>
-
+#include "sample.h"
 #include "matrix.h"
-#include "reader.h"
 #include "optimize.h"
 #include "activation.h"	
 
 namespace Trainer
 {
+    class Sample;
     
     class Network
     {
@@ -16,15 +16,11 @@ namespace Trainer
         static constexpr int HIDDEN_SIZE = 128;
         static constexpr int OUTPUT_SIZE = 1;
 
-        Network();
+        Network(std::vector<int> const& topology);
 
-        void save_network(std::string_view fil);
-        
-        void load_network(std::string_view fil);
+        void feed(Sample const&);
 
-        void feed(NetworkInput const&);
-
-        void back_propagate(NetworkInput const& sample)
+        void back_propagate(Sample const& sample)
         {
             feed(sample);
             update_gradients(sample);
@@ -32,31 +28,23 @@ namespace Trainer
 
         float get_output() const
         {
-            return output_neuron.get(0);
+            return neurons.back()(0);
         }
         
-        float get_cost(NetworkInput const& sample)
+        float get_cost(Sample const& sample)
         {
             float o = get_output();
-            return powf(sample.target - o, 2.0f) * 0.5f + powf(sample.eval_target - o, 2.0f) * 0.5f;
+            return powf(sample.wdl_target - o, 2.0f) * 0.5f + powf(sample.eval_target - o, 2.0f) * 0.5f;
         }
 
-        void update_gradients(NetworkInput const& input);
+        void update_gradients(Sample const& input);
         void apply_gradients();
 
-        Matrix<float, HIDDEN_SIZE, 1> hidden_neurons;
-        Matrix<float, OUTPUT_SIZE, 1> output_neuron;
+        std::vector<Matrix<float>> neurons;
+        std::vector<Matrix<float>> weights;
+        std::vector<Matrix<float>> biases;
 
-        Matrix<float, OUTPUT_SIZE, 1> output_bias;
-        Matrix<float, HIDDEN_SIZE, 1> hidden_biases;
-
-        Matrix<float, HIDDEN_SIZE, INPUT_SIZE, Arrangement::ColMajor>   hidden_weights;
-        Matrix<float, OUTPUT_SIZE, HIDDEN_SIZE>  output_weights;
-
-        Matrix<Parameter, OUTPUT_SIZE, 1> output_bias_gradient;
-        Matrix<Parameter, HIDDEN_SIZE, 1> hidden_bias_gradients;
-
-        Matrix<Parameter, HIDDEN_SIZE, INPUT_SIZE, Arrangement::ColMajor>  hidden_weight_gradients;
-        Matrix<Parameter, OUTPUT_SIZE, HIDDEN_SIZE> output_weight_gradients;
+        std::vector<Matrix<Parameter>> weight_gradients;
+        std::vector<Matrix<Parameter>> bias_gradients;
     };
 }

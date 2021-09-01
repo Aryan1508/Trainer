@@ -9,10 +9,13 @@ class Position
 {
 public:
     std::array<Piece, 64> pieces;
-    bool  white_to_play = false; 
-    float result = 0;
     
     Position();
+
+    Position(std::string_view fen)
+    {
+        set_fen(fen);
+    }
 
     void set_fen(std::string_view);
 
