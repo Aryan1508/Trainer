@@ -44,9 +44,9 @@ namespace Trainer
             delete[] data;
         }
 
-        void set_zero()
+        void set(T const& val)
         {
-            std::memset(data, 0, sizeof(T) * size());
+            std::fill(data, data + size(), val);
         }
 
         T& operator()(const int index)
@@ -95,29 +95,12 @@ namespace Trainer
             return row_count * col_count;
         }
 
-        bool has_same_dimensions(Matrix const& rhs) const
-        {
-            return row_count == rhs.row_count && col_count == rhs.col_count;
-        }
-
-        void he_init(const int n)
-        {
-            const float g = 2.0f / sqrtf(static_cast<float>(n));
-
-            std::random_device rd;
-            std::normal_distribution<float> distrib(0.0f, g);
-            std::mt19937 rng(12345);
-
-            for(int i = 0;i < size();i++)
-                this->operator()(i) = distrib(rng);
-        }
     private:
         void create(int rows, int cols)
         {
             row_count = rows;
             col_count = cols;
             data = new T[row_count * col_count];
-            he_init(768);
         }
 
         T* data = nullptr;

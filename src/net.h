@@ -7,30 +7,21 @@
 
 namespace Trainer
 {
-    class Sample;
+    class Network;
+
+    float forward_propagate(Input const& input, Network&);
     
     class Network
     {
     public:
-        static constexpr int INPUT_SIZE  = 768;
-        static constexpr int HIDDEN_SIZE = 128;
-        static constexpr int OUTPUT_SIZE = 1;
-
         Network(std::vector<int> const& topology);
-
-        float feed(Sample const&);
 
         void back_propagate(Sample const& sample)
         {
-            feed(sample);
+            forward_propagate(sample.input, *this);
             update_gradients(sample);
         }
 
-        float get_output() const
-        {
-            return neurons.back()(0);
-        }
-        
         void update_gradients(Sample const& input);
         void apply_gradients();
 

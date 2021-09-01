@@ -4,6 +4,8 @@
 
 namespace Trainer
 {
+    typedef float(*ActivationFunction)(float);
+
     constexpr float sigmoid_scale = 2.5f / 1024.0f;
 
     inline float sigmoid(float x)

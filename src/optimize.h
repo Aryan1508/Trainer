@@ -15,8 +15,6 @@ namespace Trainer
     public:
         Parameter() = default;
 
-        void operator=(float) {}
-
         void update_gradient(float delta)
         {
             gradient += delta;
