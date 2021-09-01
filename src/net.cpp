@@ -1,4 +1,5 @@
 #include "net.h"
+#include "cost.h"
 #include "sample.h"
 
 #include <thread>
@@ -23,7 +24,7 @@ namespace Trainer
         }
     }
 
-    void Network::feed(Sample const& sample)
+    float Network::feed(Sample const& sample)
     {
         neurons[0].set_zero();
 
@@ -54,13 +55,13 @@ namespace Trainer
                 output(i) = sigmoid(output(i) + bias(i));
             }
         }
+
+        return neurons.back()(0);
     }
 
     void Network::update_gradients(Sample const& sample)
     {
-        float cost_d = 2.0f * 0.5f * (get_output() - sample.wdl_target);
-        cost_d += 2.0f * 0.5f * (get_output() - sample.eval_target);
-        float error = cost_d * sigmoid_prime(get_output());
+        float error = calculate_cost_gradient(sample, *this) * sigmoid_prime(get_output());
 
         for (int i = 0; i < neurons[0].size(); i++)
         {

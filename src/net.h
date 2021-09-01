@@ -18,7 +18,7 @@ namespace Trainer
 
         Network(std::vector<int> const& topology);
 
-        void feed(Sample const&);
+        float feed(Sample const&);
 
         void back_propagate(Sample const& sample)
         {
@@ -31,12 +31,6 @@ namespace Trainer
             return neurons.back()(0);
         }
         
-        float get_cost(Sample const& sample)
-        {
-            float o = get_output();
-            return powf(sample.wdl_target - o, 2.0f) * 0.5f + powf(sample.eval_target - o, 2.0f) * 0.5f;
-        }
-
         void update_gradients(Sample const& input);
         void apply_gradients();
 

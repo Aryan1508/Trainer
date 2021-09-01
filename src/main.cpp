@@ -1,4 +1,5 @@
 #include "net.h"
+#include "cost.h"
 #include "sample.h"
 #include "stopwatch.h"
 #include <memory>
@@ -11,7 +12,6 @@ void fit(Trainer::Network& net, std::vector<Trainer::Sample>& inputs, int epoch)
     StopWatch watch;
     watch.go();
 
-    long double cost = 0;
     for (auto const& input : inputs)
     {
         if (++i % 16384 == 0)
@@ -22,10 +22,7 @@ void fit(Trainer::Network& net, std::vector<Trainer::Sample>& inputs, int epoch)
         }
 
         net.back_propagate(input);
-        cost += net.get_cost(input);
     }
-    
-    std::cout << " Cost [ " << (cost / (double)inputs.size()) << " ]\n";
 }
 
 int main()
@@ -39,5 +36,6 @@ int main()
     for (int i = 0; i < 200; i++)
     {
         fit(*net, positions, i); 
+        std::cout << std::setprecision(8) << " Cost [ " << Trainer::calculate_cost(positions, *net) << " ]\n";
     }
 }
