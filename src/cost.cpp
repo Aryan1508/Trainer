@@ -1,5 +1,7 @@
-#include "cost.h"
 #include "net.h"
+#include "cost.h"
+#include "sample.h"
+
 #include <iostream>
 
 static constexpr float cost_eval_weight = 0.5f;

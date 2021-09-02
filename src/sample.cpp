@@ -29,7 +29,7 @@ namespace Trainer
         wdl_target  = extract_wdl(str);
     }   
 
-    std::vector<Sample> load_inputs(std::string_view path, 
+    std::vector<Sample> load_samples(std::string_view path, 
                                     std::size_t limit)
     {
         std::ifstream file(path.data());

@@ -15,7 +15,7 @@ namespace Trainer
 
             for(int j = 0;j < input.size();j++)
                 output(i) += input(j) * weights(i, j);
-
+    
             output(i) = activation(output(i) + biases(i));
         }
     }
