@@ -1,48 +1,38 @@
 #include "net.h"
 #include "cost.h"
-#include "sample.h"
+#include "dataset.h"
 #include "optimize.h"
-#include "stopwatch.h"
-#include <memory>
-#include <iomanip>
+
 #include <iostream>
-
-void fit(Trainer::Network& net, Trainer::Gradients& gradients, std::vector<Trainer::Sample>& inputs, int epoch)
-{
-    int i = 0;
-    StopWatch watch;
-    watch.go();
-
-    for (auto const& input : inputs)
-    {
-        if (++i % 16384 == 0)
-        {
-            Trainer::apply_gradients(net, gradients);
-
-            double eps = 16384 / (double)watch.elapsed_time().count() * 1000;
-            std::cout << "\rEpoch #" << epoch << " Evaluated [ " << i << " ]" << " EPS [ " << eps << " ] ";
-            
-            watch.reset();
-            watch.go();
-        }
-
-        Trainer::calculate_gradients(input, net, gradients);
-    }
-}
 
 int main()
 {
-    std::cout << std::fixed << std::setprecision(8);
-
-    auto net = std::unique_ptr<Trainer::Network>(new Trainer::Network({768, 128, 1}));
+    Dataset   dataset("C:/tuning/Datasets/8b5ed5872e.txt", 2000000);
+    Network   network({768, 128, 1});
+    Gradients gradients({768, 128, 1});
     
-    auto positions = Trainer::load_samples("C:/tuning/8b5ed5872e.txt", 200000);
+    std::cout << "Training size=" << dataset.training.size() << '\n';
 
-    auto gradients = std::unique_ptr<Trainer::Gradients>(new Trainer::Gradients({768, 128, 1}));
-
-    for (int i = 0; i < 200; i++)
+    while (true)
     {
-        std::cout << std::setprecision(8) << " Cost [ " << Trainer::calculate_cost(positions, *net) << " ]\n";
-        fit(*net, *gradients, positions, i); 
+        for(std::size_t i = 0;i < dataset.training.size();i++)
+        {
+            calculate_gradients(dataset.training[i], network, gradients);
+
+            if (i % 16384 == 0)
+            {
+                apply_gradients(network, gradients);
+                std::cout << "\rEvaluated [" << i + 1 << "]";
+            }
+        }
+
+        std::cout << '\r' << std::string(' ', 32) << std::endl;
+        std::cout.precision(8);
+
+        const float validation_cost = calculate_cost(dataset.validation, network);
+        const float training_cost   = calculate_cost(dataset.training, network);
+
+        std::cout << "Validation [" << validation_cost << "] ";
+        std::cout << "Training   [" << training_cost   << "]\n";
     }
 }

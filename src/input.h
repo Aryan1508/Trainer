@@ -4,12 +4,9 @@
 
 class Position;
     
-namespace Trainer
+struct Input
 {
-    struct Input
-    {
-        Input(Position const&);
-        
-        std::vector<std::uint16_t> indices;
-    };
-}
+    Input(Position const&);
+    
+    std::vector<std::uint16_t> indices;
+};

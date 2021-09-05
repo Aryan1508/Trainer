@@ -6,19 +6,13 @@
 
 class Position;
 
-namespace Trainer
+struct Sample
 {
-    struct Sample
-    {
-        // <fen> [<wdl>] <wpov score>
-        Sample(std::string_view);
+    // <fen> [<wdl>] <wpov score>
+    Sample(std::string_view);
 
-        Input input;
+    Input input;
 
-        float wdl_target  = 0,
-              eval_target = 0;
-    };
-
-    std::vector<Sample> load_samples(std::string_view path, 
-                                    std::size_t limit);
-}
+    float wdl_target  = 0,
+            eval_target = 0;
+};
