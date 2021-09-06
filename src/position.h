@@ -10,7 +10,10 @@ class Position
 public:
     std::array<Piece, 64> pieces;
     
-    Position();
+    Position()
+    {
+        set_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    }
 
     Position(std::string_view fen)
     {
@@ -43,3 +46,8 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, Position const&);
 };
+
+inline std::ostream& operator<<(std::ostream& o, Position const& position)
+{
+    return o << position.get_fen();
+}
