@@ -35,13 +35,22 @@ namespace
 
     void run_epoch(Network& network, Dataset const& dataset, Gradients& gradients)
     {
+        std::cout.precision(2);
+        std::cout.setf(std::ios::fixed);
+
         for(std::size_t i = 0;i < dataset.training.size();i++)
         {
             calculate_gradients(dataset.training[i], network, gradients);
 
             if(i && i % batch_size == 0)
+            {
                 apply_gradients(network, gradients);
+                
+                const double completed = i / static_cast<double>(dataset.training.size()) * 100;
+                std::cout << "\rCompleted " << completed << "%";
+            }
         }
+        std::cout << '\r';
     }
 }
 

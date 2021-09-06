@@ -12,7 +12,7 @@ int main()
 {
     const std::vector<int> topology{768, 128, 1};
 
-    Dataset   dataset("C:/tuning/Datasets/8b5ed5872e.txt", 200000);
+    Dataset   dataset("C:/tuning/Datasets/8b5ed5872e.txt", 20000000);
     Network   network(topology);
     Gradients gradients(topology);
 
