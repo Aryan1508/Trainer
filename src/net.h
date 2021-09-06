@@ -15,3 +15,5 @@ struct Network
 };
 
 float forward_propagate(Input const& input, Network&);
+
+std::vector<int> get_topology(Network const&);

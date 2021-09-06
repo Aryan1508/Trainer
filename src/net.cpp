@@ -56,3 +56,13 @@ float forward_propagate(Input const& input, Network& network)
 
     return network.neurons.back()(0);
 }
+
+std::vector<int> get_topology(Network const& network)
+{
+    std::vector<int> topology;
+
+    for(auto const& layer : network.neurons)
+        topology.push_back(layer.size());
+
+    return topology;
+}
