@@ -89,6 +89,4 @@ void Position::set_fen(std::string_view fen)
             }
         }
     }
-
-    white_to_play = parts[1] == "w";
 }

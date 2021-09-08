@@ -1,65 +1,107 @@
 #pragma once
-#include <array>
 #include <random>
 #include <cassert>
-#include <iostream>
-#include <algorithm>
+#include <cstring>
 
-namespace Trainer
+template<typename T> 
+class Matrix
 {
-    enum class Arrangement { RowMajor, ColMajor };
+public:
+    Matrix() = default;
 
-    template<typename T, int X, int Y, Arrangement A = Arrangement::RowMajor> 
-    class Matrix
+    explicit Matrix(int size) 
     {
-    public:
-        Matrix() = default;
+        create(size, 1);
+    }
 
-        T& get(int row, int col)
-        {
-            return A == Arrangement::RowMajor ? data[row * Y + col] : data[col * X + row];
-        }
+    Matrix(int rows, int cols)
+    {
+        create(rows, cols);
+    }
 
-        T const& get(int row, int col) const
-        {
-            return A == Arrangement::RowMajor ? data[row * Y + col] : data[col * X + row];
-        }
+    Matrix(Matrix const& rhs) 
+    {
+        create(rhs.row_count, rhs.col_count);
+        std::memcpy(data, rhs.data, sizeof(T) * rhs.size());
+    }
 
-        T& get(int i)
-        {
-            return data[i];
-        }
+    void operator=(Matrix const& rhs) 
+    {
+        assert(has_same_dimensions(rhs));
+        std::memcpy(data, rhs.data, sizeof(T) * rhs.size());
+    }
 
-        T const& get(int i) const
-        {
-            return data[i];
-        }
+    void resize(int rows, int cols)
+    {
+        delete[] data;
+        create(rows, cols);
+    }
 
-        void set(T const& val)
-        {
-            std::fill(data.begin(), data.end(), val);
-        }
+    ~Matrix() 
+    {
+        delete[] data;
+    }
 
-        T* raw()
-        {
-            return &data[0];
-        }
+    void set(T const& val)
+    {
+        std::fill(data, data + size(), val);
+    }
 
-        static constexpr int total_rows() 
-        {
-            return X;
-        }
+    T& operator()(const int index)
+    {
+        assert(index < size());
+        return data[index];
+    }
 
-        static constexpr int total_cols() 
-        {
-            return Y;
-        }
+    T const& operator()(const int index) const
+    {
+        assert(index < size());
+        return data[index];
+    }
 
-        static constexpr int size() 
-        {
-            return static_cast<int>(X * Y);
-        }
-    private:
-        std::array<T, X * Y> data;
-    };
-}
+    T& operator()(const int row, const int col)
+    {
+        assert(row < row_count && col < col_count);
+        return data[col * row_count + row];
+        // return data[row * col_count + col];
+    }
+
+    T const& operator()(const int row, const int col) const
+    {
+        assert(row < row_count && col < col_count);
+        return data[col * row_count + row];
+        // return data[row * col_count + col];
+    }
+
+    T* raw()
+    {
+        return data;
+    }
+
+    int rows() const 
+    {
+        return row_count;
+    }
+
+    int cols() const 
+    {
+        return col_count;
+    }
+
+    int size() const
+    {
+        return row_count * col_count;
+    }
+
+private:
+    void create(int rows, int cols)
+    {
+        row_count = rows;
+        col_count = cols;
+        data = new T[row_count * col_count];
+    }
+
+    T* data = nullptr;
+    int    row_count;
+    int    col_count;
+};

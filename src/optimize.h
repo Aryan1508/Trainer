@@ -1,35 +1,26 @@
-#pragma once
-#include <math.h>
+#pragma once 
+#include "matrix.h"
+#include "gradient.h"
+#include <vector>
+#include <utility>
 
-namespace Trainer
+struct Sample;
+class Network;
+
+struct Gradients 
 {
-    constexpr double BETA_1 = 0.9f;
-    constexpr double BETA_2 = 0.999f;
+    Gradients(std::vector<int> const& topology);
 
-    class Parameter
-    {
-    private:
-        double gradient = 0;
-        double M = 0, V = 0;
+    std::vector<Matrix<Gradient>> weight_gradients;
+    std::vector<Matrix<Gradient>>   bias_gradients;
+};
 
-    public:
-        Parameter() = default;
+void apply_gradients(Network&, Gradients&);
 
-        void update_gradient(float delta)
-        {
-            gradient += delta;
-        }
+void calculate_gradients(Sample const&, Network&, Gradients&);
 
-        double get_final_gradient()
-        {
-            if (!gradient)
-                return 0;
+float calculate_output_gradient(Sample const&, Network&);
 
-            M = M * BETA_1 + gradient * (1 - BETA_1);
-            V = V * BETA_2 + (gradient * gradient) * (1 - BETA_2);
+float calculate_output_gradient(Sample const&, const float output);
 
-            gradient = 0;
-            return -0.01 * M / (sqrt(V) + 1e-8);
-        }
-    };
-}
+float calculate_cost_gradient(Sample const&, const float output);
