@@ -1,6 +1,7 @@
 #include "net.h"
 #include "cost.h"
 #include "dataset.h"
+#include "cmdline.h"
 #include "training.h"
 #include "optimize.h"
 
@@ -8,13 +9,13 @@
 #include <sstream>
 #include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
+    CommandLineParser cmdline(argc, argv);
+
     const std::vector<int> topology{768, 128, 1};
+    const int n_threads = cmdline.get_option("-threads", 1);
 
-    Dataset   dataset("C:/tuning/Datasets/8b5ed5872e.txt", 20000000);
-    Network   network(topology);
-    Gradients gradients(topology);
-
-    train_network(network, dataset, gradients);
+    Trainer trainer(topology, "C:/tuning/Datasets/8b5ed5872e.txt", n_threads);
+    train_network(trainer);
 }

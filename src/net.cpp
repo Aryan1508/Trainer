@@ -38,31 +38,21 @@ Network::Network(std::vector<int> const& topology)
 float forward_propagate(Input const& input, Network& network)
 {
     forward_propagate(input,
-                        network.neurons[0],
-                        network.weights[0],
-                        network.biases[0],
-                        relu);
+                      network.neurons[0],
+                      network.weights[0],
+                      network.biases[0],
+                      relu);
 
     for(std::size_t i = 1;i < network.neurons.size();i++)
     {
         const auto activation = i == network.neurons.size() - 1 ? sigmoid 
-                                                            : relu;
+                                                                : relu;
         forward_propagate(network.neurons[i - 1],
-                            network.neurons[i],
-                            network.weights[i],
-                            network.biases[i],
-                            activation);
+                          network.neurons[i],
+                          network.weights[i],
+                          network.biases[i],
+                          activation);
     }
 
     return network.neurons.back()(0);
-}
-
-std::vector<int> get_topology(Network const& network)
-{
-    std::vector<int> topology;
-
-    for(auto const& layer : network.neurons)
-        topology.push_back(layer.size());
-
-    return topology;
 }

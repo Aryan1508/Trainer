@@ -17,6 +17,8 @@ struct Gradients
 
 void apply_gradients(Network&, Gradients&);
 
+void reset_gradients(Gradients&);
+
 void calculate_gradients(Sample const&, Network&, Gradients&);
 
 float calculate_output_gradient(Sample const&, Network&);

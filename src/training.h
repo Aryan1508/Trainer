@@ -1,8 +1,15 @@
 #pragma once 
+#include "threaddata.h"
+
 #include <vector>
+#include <string_view>
 
-struct Network;
-struct Dataset;
-struct Gradients;
+struct Trainer
+{
+    Trainer(std::vector<int> const& topology, std::string_view dataset_path, const int n_threads);
 
-void train_network(Network&, Dataset const&, Gradients& gradients);
+    Dataset dataset;
+    std::vector<ThreadData> thread_data;  
+};
+
+void train_network(Trainer& trainer);
