@@ -28,7 +28,7 @@ float calculate_output_gradient(Sample const& sample, const float output)
 }
 
 void apply_gradients(Matrix<float>& values, 
-                        Matrix<Gradient>& gradients)
+                     Matrix<Gradient>& gradients)
 {
     for(int i = 0;i < values.size();i++)
         apply_gradient(gradients(i), values(i));
@@ -40,6 +40,21 @@ void apply_gradients(Network& network, Gradients& gradients)
     {
         apply_gradients(network.weights[layer], gradients.weight_gradients[layer]);
         apply_gradients(network.biases[layer], gradients.bias_gradients[layer]);
+    }
+}
+
+void reset_gradients(Matrix<Gradient>& gradients)
+{   
+    for(int i = 0;i < gradients.size();i++)
+        reset_gradient(gradients(i));
+}
+
+void reset_gradients(Gradients& gradients)
+{
+    for(std::size_t layer = 0;layer < gradients.bias_gradients.size();layer++)
+    {
+        reset_gradients(gradients.bias_gradients[layer]);
+        reset_gradients(gradients.weight_gradients[layer]);
     }
 }
 

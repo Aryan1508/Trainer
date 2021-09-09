@@ -8,17 +8,22 @@
 
 struct Dataset
 {   
-    Dataset(std::string_view path, std::size_t limit)
+    Dataset(std::string_view path, std::size_t limit = 2000000)
     {   
-        const std::size_t training_size = 0.9 * limit;
-
-        std::cout.precision(2);
-
         std::ifstream file(path.data());
 
         if (!file)
             throw std::invalid_argument("Cannot open " + std::string(path));
 
+        if (limit == 0)
+        {
+            limit = std::count(std::istreambuf_iterator<char>(file),
+                               std::istreambuf_iterator<char>(), '\n');
+        }   
+
+        std::cout.precision(2);
+
+        const std::size_t training_size = 0.9 * limit;
         std::size_t total_read = 0;
 
         for(std::string line; std::getline(file, line);)

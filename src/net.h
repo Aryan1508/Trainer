@@ -16,4 +16,5 @@ struct Network
 
 float forward_propagate(Input const& input, Network&);
 
-std::vector<int> get_topology(Network const&);
+void save_network(Network const&, std::string_view path);
+void load_network(Network&      , std::string_view path);

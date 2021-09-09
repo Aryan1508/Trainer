@@ -1,10 +1,11 @@
-#include "net.h"
 #include "cost.h"
 #include "table.h"
 #include "dataset.h"
-#include "optimize.h"
 #include "training.h"
+#include "stopwatch.h"
 
+#include <chrono>
+#include <thread>
 #include <sstream>
 #include <iomanip>
 
@@ -33,35 +34,118 @@ namespace
         table.print_value_row(values);
     }
 
-    void run_epoch(Network& network, Dataset const& dataset, Gradients& gradients)
+    void sum_gradients(Matrix<Gradient>& base, Matrix<Gradient>& delta)
+    {
+        for(int i = 0;i < delta.size();i++)
+        {
+            update_gradient(base(i), delta(i).value);
+            delta(i).value = 0;
+        }
+    }
+
+    void sum_gradients(Gradients& base, Gradients& delta)
+    {
+        for(std::size_t layer = 0;layer < base.bias_gradients.size();layer++)
+        {
+            sum_gradients(base.bias_gradients[layer], delta.bias_gradients[layer]);
+            sum_gradients(base.weight_gradients[layer], delta.weight_gradients[layer]);
+        }
+    }
+
+    void sum_gradients(Trainer& trainer)
+    {
+        if (trainer.thread_data.size() == 1)
+            return;
+            
+        Gradients& master_gradients = trainer.thread_data[0].gradients;
+
+        for(std::size_t thread = 1;thread < trainer.thread_data.size();thread++)
+        {
+            Gradients& delta = trainer.thread_data[thread].gradients;
+            sum_gradients(master_gradients, delta);
+        }
+    }
+
+    void complete_local_batch(Dataset const& dataset, ThreadData& thread, const std::size_t start, const std::size_t size)
+    {
+        const std::size_t end = start + size;
+
+        for(std::size_t i = start;i < end;i++)
+        {
+            calculate_gradients(dataset.training[i], thread.network, thread.gradients);
+        }
+    }
+
+    void complete_batch(Trainer& trainer, const std::size_t start)
+    {
+        const std::size_t local_batch_size = batch_size / trainer.thread_data.size();
+
+        std::vector<std::thread> threads;
+
+        for(std::size_t i = 0;i < trainer.thread_data.size();i++)
+            threads.emplace_back(complete_local_batch, 
+                                 std::ref(trainer.dataset),
+                                 std::ref(trainer.thread_data[i]),
+                                 start + (i * local_batch_size),
+                                 local_batch_size);
+
+        for(auto& thread : threads) thread.join();
+
+        sum_gradients(trainer);
+    }
+
+    void apply_gradients(Trainer& trainer)
+    {
+        Gradients& gradients = trainer.thread_data[0].gradients;
+
+        apply_gradients(trainer.thread_data[0].network, gradients);
+        
+        for(std::size_t thread = 1;thread < trainer.thread_data.size();thread++)
+            trainer.thread_data[thread].network = trainer.thread_data[0].network;
+
+        reset_gradients(gradients);
+    }
+
+    void complete_epoch(Trainer& trainer)
     {
         std::cout.precision(2);
         std::cout.setf(std::ios::fixed);
 
-        for(std::size_t i = 0;i < dataset.training.size();i++)
-        {
-            calculate_gradients(dataset.training[i], network, gradients);
+        Dataset const& dataset  = trainer.dataset;
 
-            if(i && i % batch_size == 0)
-            {
-                apply_gradients(network, gradients);
-                
-                const double completed = i / static_cast<double>(dataset.training.size()) * 100;
-                std::cout << "\rCompleted " << completed << "%";
-            }
+        StopWatch watch;
+        watch.go();
+
+        for(std::size_t i = 0;i < dataset.training.size();i += batch_size)
+        {   
+            const float evaluated_percent = i / static_cast<float>(dataset.training.size()) * 100;
+            const float elapsed = watch.elapsed_time().count() / 1000.0f;
+            const float speed   = i / elapsed;
+
+            std::cout << "\rRunning epoch " << evaluated_percent << "% [" << speed << " /s]";            
+
+            complete_batch(trainer, i);
+            apply_gradients(trainer);
         }
         std::cout << '\r';
     }
 }
 
-void train_network(Network& network, Dataset const& dataset, Gradients& gradients)
+void train_network(Trainer& trainer)
 {
     Table table(std::cout, 32, {"Epoch", "Training", "Validation"});
-
     table.print_headers();
+
     for(int epoch = 1;epoch <= max_epochs;epoch++)
     {
-        run_epoch(network, dataset, gradients);
-        print_cost(table, network, dataset, epoch);
+        complete_epoch(trainer);
+        print_cost(table, trainer.thread_data[0].network, trainer.dataset, epoch);
     }
+}
+
+Trainer::Trainer(std::vector<int> const& topology, std::string_view dataset_path, const int n_threads)
+    : dataset(dataset_path), thread_data(n_threads, ThreadData(topology))
+{
+    if (n_threads <= 0)
+        throw std::invalid_argument("Invalid thread count");
 }
