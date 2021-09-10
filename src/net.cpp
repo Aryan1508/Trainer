@@ -2,6 +2,7 @@
 #include "cost.h"
 #include "sample.h"
 #include "matmul.h"
+#include "neurons.h"
 
 #include <vector>
 #include <random>
@@ -25,34 +26,44 @@ Network::Network(std::vector<int> const& topology)
         const int output_size = topology[i];
         const int input_size  = topology[i - 1];
 
-        neurons.push_back(Matrix<float>(output_size));
         biases .push_back(Matrix<float>(output_size));
         weights.push_back(Matrix<float>(output_size, input_size));
         
         he_initialize_matrix(weights.back(), input_size);
         he_initialize_matrix(biases.back() , input_size);
-        neurons.back().set(0.0f);
     }
 }
 
-float forward_propagate(Input const& input, Network& network)
+float forward_propagate(Input const& input, Network const& network, Neurons& neurons)
 {
     forward_propagate(input,
-                      network.neurons[0],
+                      neurons.activations[0],
                       network.weights[0],
                       network.biases[0],
                       relu);
 
-    for(std::size_t i = 1;i < network.neurons.size();i++)
+    for(std::size_t i = 1;i < neurons.activations.size();i++)
     {
-        const auto activation = i == network.neurons.size() - 1 ? sigmoid 
-                                                                : relu;
-        forward_propagate(network.neurons[i - 1],
-                          network.neurons[i],
+        const auto activation = i == neurons.activations.size() - 1 ? sigmoid 
+                                                                    : relu;
+        forward_propagate(neurons.activations[i - 1],
+                          neurons.activations[i],
                           network.weights[i],
                           network.biases[i],
                           activation);
     }
 
-    return network.neurons.back()(0);
+    return neurons.activations.back()(0);
+}
+
+std::vector<int> get_topology(Network const& network)
+{
+    std::vector<int> topology;
+
+    topology.push_back(network.weights[0].cols()); // Input layer
+
+    for(auto const& layer : network.biases)
+        topology.push_back(layer.size());
+
+    return topology;
 }

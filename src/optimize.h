@@ -5,6 +5,7 @@
 #include <utility>
 
 struct Sample;
+struct Neurons;
 class Network;
 
 struct Gradients 
@@ -19,9 +20,9 @@ void apply_gradients(Network&, Gradients&);
 
 void reset_gradients(Gradients&);
 
-void calculate_gradients(Sample const&, Network&, Gradients&);
+void calculate_gradients(Sample const&, Network const&, Neurons&, Gradients&);
 
-float calculate_output_gradient(Sample const&, Network&);
+float calculate_output_gradient(Sample const&, Network const&, Neurons&);
 
 float calculate_output_gradient(Sample const&, const float output);
 

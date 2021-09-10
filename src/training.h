@@ -9,6 +9,7 @@ struct Trainer
     Trainer(std::vector<int> const& topology, std::string_view dataset_path, const int n_threads);
 
     Dataset dataset;
+    Network network;
     std::vector<ThreadData> thread_data;  
 };
 

@@ -31,6 +31,7 @@ inline float calculate_gradient(Gradient& grad)
 inline void apply_gradient(Gradient& grad, float& parameter)
 {
     parameter -= calculate_gradient(grad);
+    grad.value = 0.0f;
 }
 
 inline void reset_gradient(Gradient& grad)

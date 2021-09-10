@@ -66,13 +66,13 @@ namespace
         }
     }
 
-    void complete_local_batch(Dataset const& dataset, ThreadData& thread, const std::size_t start, const std::size_t size)
+    void complete_local_batch(Dataset const& dataset, Network const& network, ThreadData& thread, const std::size_t start, const std::size_t size)
     {
         const std::size_t end = start + size;
 
         for(std::size_t i = start;i < end;i++)
         {
-            calculate_gradients(dataset.training[i], thread.network, thread.gradients);
+            calculate_gradients(dataset.training[i], network, thread.neurons, thread.gradients);
         }
     }
 
@@ -85,6 +85,7 @@ namespace
         for(std::size_t i = 0;i < trainer.thread_data.size();i++)
             threads.emplace_back(complete_local_batch, 
                                  std::ref(trainer.dataset),
+                                 std::ref(trainer.network),
                                  std::ref(trainer.thread_data[i]),
                                  start + (i * local_batch_size),
                                  local_batch_size);
@@ -98,12 +99,7 @@ namespace
     {
         Gradients& gradients = trainer.thread_data[0].gradients;
 
-        apply_gradients(trainer.thread_data[0].network, gradients);
-        
-        for(std::size_t thread = 1;thread < trainer.thread_data.size();thread++)
-            trainer.thread_data[thread].network = trainer.thread_data[0].network;
-
-        reset_gradients(gradients);
+        apply_gradients(trainer.network, gradients);
     }
 
     void complete_epoch(Trainer& trainer)
@@ -139,12 +135,12 @@ void train_network(Trainer& trainer)
     for(int epoch = 1;epoch <= max_epochs;epoch++)
     {
         complete_epoch(trainer);
-        print_cost(table, trainer.thread_data[0].network, trainer.dataset, epoch);
+        print_cost(table, trainer.network, trainer.dataset, epoch);
     }
 }
 
 Trainer::Trainer(std::vector<int> const& topology, std::string_view dataset_path, const int n_threads)
-    : dataset(dataset_path), thread_data(n_threads, ThreadData(topology))
+    : dataset(dataset_path), network(topology), thread_data(n_threads, ThreadData(topology))
 {
     if (n_threads <= 0)
         throw std::invalid_argument("Invalid thread count");
