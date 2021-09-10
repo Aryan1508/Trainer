@@ -16,9 +16,9 @@ Gradients::Gradients(std::vector<int> const& topology)
     }
 }
 
-float calculate_output_gradient(Sample const& sample, Network& network)
+float calculate_output_gradient(Sample const& sample, Network const& network, Neurons& neurons)
 {
-    const float output = forward_propagate(sample.input, network);
+    const float output = forward_propagate(sample.input, network, neurons);
     return calculate_output_gradient(sample, output);
 }
 
@@ -36,7 +36,7 @@ void apply_gradients(Matrix<float>& values,
 
 void apply_gradients(Network& network, Gradients& gradients)
 {
-    for(std::size_t layer = 0;layer < network.neurons.size();layer++)
+    for(std::size_t layer = 0;layer < network.biases.size();layer++)
     {
         apply_gradients(network.weights[layer], gradients.weight_gradients[layer]);
         apply_gradients(network.biases[layer], gradients.bias_gradients[layer]);
@@ -58,16 +58,16 @@ void reset_gradients(Gradients& gradients)
     }
 }
 
-void calculate_errors(Sample const& sample, Network& network, std::vector<Matrix<float>>& errors)
+void calculate_errors(Sample const& sample, Network const& network, Neurons& neurons, std::vector<Matrix<float>>& errors)
 {
-    const float output_gradient = calculate_output_gradient(sample, network);
+    const float output_gradient = calculate_output_gradient(sample, network, neurons);
 
     errors.back()(0) = output_gradient;
 
-    for(std::size_t layer = network.neurons.size() - 1;layer --> 0;)
+    for(std::size_t layer = neurons.activations.size() - 1;layer --> 0;)
     {
-        auto const& neurons = network.neurons[layer];
-        auto const& weights = network.weights[layer + 1];
+        auto const& activations = neurons.activations[layer];
+        auto const& weights     = network.weights[layer + 1];
 
         auto const& output_errors = errors[layer + 1];
         auto      & layer_errors  = errors[layer];
@@ -77,7 +77,7 @@ void calculate_errors(Sample const& sample, Network& network, std::vector<Matrix
             layer_errors(i) = 0.0f;
 
             for(int j = 0;j < output_errors.size();j++)
-                layer_errors(i) += output_errors(j) * weights(j, i) * relu_prime(neurons(i));
+                layer_errors(i) += output_errors(j) * weights(j, i) * relu_prime(activations(i));
         }
     }        
 }
@@ -98,18 +98,18 @@ void calculate_hidden_gradients(Sample const& sample, Gradients& gradients, std:
         update_gradient(bias_gradients(i), hidden_errors(i));
 }
 
-void calculate_gradients(Sample const& sample, Network& network, Gradients& gradients)
+void calculate_gradients(Sample const& sample, Network const& network, Neurons& neurons, Gradients& gradients)
 {
-    auto errors = network.neurons;
+    auto errors = neurons.activations;
     
-    calculate_errors(sample, network, errors);
+    calculate_errors(sample, network, neurons, errors);
     calculate_hidden_gradients(sample, gradients, errors);
 
-    for(std::size_t layer = 1;layer < network.neurons.size();layer++)
+    for(std::size_t layer = 1;layer < neurons.activations.size();layer++)
     {
         auto& weight_grads = gradients.weight_gradients[layer];
         auto& bias_grads   = gradients.bias_gradients[layer];
-        auto& neurons      = network.neurons[layer - 1];
+        auto& activations  = neurons.activations[layer - 1];
 
         for(int i = 0;i < bias_grads.size();i++)
         {
@@ -118,7 +118,7 @@ void calculate_gradients(Sample const& sample, Network& network, Gradients& grad
 
             for(int j = 0;j < weight_grads.rows();j++)
             {
-                const float gradient = neurons(i) * errors[layer](j);
+                const float gradient = activations(i) * errors[layer](j);
                 update_gradient(weight_grads(j, i), gradient);
             }
         }

@@ -7,9 +7,9 @@
 struct ThreadData
 {
     ThreadData(std::vector<int> const& topology)
-        : network(topology), gradients(topology)
+        : neurons(topology), gradients(topology)
     {}
 
-    Network   network;
+    Neurons   neurons;
     Gradients gradients;
 };
