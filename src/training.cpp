@@ -132,10 +132,13 @@ void train_network(Trainer& trainer)
     Table table(std::cout, 32, {"Epoch", "Training", "Validation"});
     table.print_headers();
 
-    for(int epoch = 1;epoch <= max_epochs;epoch++)
+    print_cost(table, trainer.network, trainer.dataset, 0);
+
+    for(int epoch = 1;epoch <= 5;epoch++)
     {
         complete_epoch(trainer);
         print_cost(table, trainer.network, trainer.dataset, epoch);
+        save_network(trainer.network, "test.nn");
     }
 }
 

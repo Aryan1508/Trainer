@@ -67,3 +67,37 @@ std::vector<int> get_topology(Network const& network)
 
     return topology;
 }
+
+void save_network(Network const& network, std::string_view path)
+{
+    const char* p = path.data();
+    FILE* file = fopen(p, "wb");
+
+    const std::size_t n_layers = network.biases.size();
+
+    // Write weights
+    for(std::size_t i = 0;i < n_layers;i++)
+        fwrite(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
+
+    // Write biases
+    for(std::size_t i = 0;i < n_layers;i++)
+        fwrite(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
+
+    fclose(file);
+}
+
+void load_network(Network& network, std::string_view path)
+{
+    const char* p = path.data();
+    FILE* file = fopen(p, "rb");
+
+    const std::size_t n_layers = network.biases.size();
+
+    for(std::size_t i = 0;i < n_layers;i++)
+        fread(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
+
+    for(std::size_t i = 0;i < n_layers;i++)
+        fread(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
+
+    fclose(file);
+}

@@ -78,6 +78,11 @@ public:
         return data;
     }
 
+    const T* raw() const
+    {
+        return data;
+    }
+
     int rows() const 
     {
         return row_count;
