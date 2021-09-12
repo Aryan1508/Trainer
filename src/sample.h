@@ -34,5 +34,5 @@ struct Sample
     Input input;
 
     float wdl_target  = 0,
-            eval_target = 0;
+          eval_target = 0;
 };

@@ -13,7 +13,7 @@ void he_initialize_matrix(Matrix<float>& mat, const int n_input_neurons)
 
     std::random_device rd;
     std::normal_distribution<float> distrib(0.0f, g);
-    std::mt19937 rng(1234);
+    std::mt19937 rng(rd());
 
     for(int i = 0;i < mat.size();i++)
         mat(i) = distrib(rng);
@@ -68,20 +68,40 @@ std::vector<int> get_topology(Network const& network)
     return topology;
 }
 
+std::uint32_t hash_network(Network const& network)
+{
+    float sum = 0.0f;
+
+    for(auto& weights : network.weights)
+        for(int i = 0;i < weights.size();i++)
+            sum += weights(i);
+
+    return std::hash<float>{}(sum);
+}
+
+constexpr std::uint32_t network_key = 1113194752;
+
 void save_network(Network const& network, std::string_view path)
 {
     const char* p = path.data();
     FILE* file = fopen(p, "wb");
 
-    const std::size_t n_layers = network.biases.size();
+    const auto topology = get_topology(network);
+    const std::uint32_t hash     = hash_network(network);
+    const std::uint32_t n_layers = static_cast<std::uint32_t>(topology.size());
 
-    // Write weights
-    for(std::size_t i = 0;i < n_layers;i++)
+    fwrite(&network_key  , sizeof(std::uint32_t), 1, file);
+    fwrite(&hash         , sizeof(std::uint32_t), 1, file);  
+    fwrite(&n_layers     , sizeof(std::uint32_t), 1, file);
+
+    for(const std::uint32_t layer_size : topology)
+        fwrite(&layer_size, sizeof(std::uint32_t), 1, file);
+
+    for(std::size_t i = 0;i < n_layers - 1;i++)
+    {
         fwrite(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
-
-    // Write biases
-    for(std::size_t i = 0;i < n_layers;i++)
         fwrite(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
+    }
 
     fclose(file);
 }
@@ -91,13 +111,27 @@ void load_network(Network& network, std::string_view path)
     const char* p = path.data();
     FILE* file = fopen(p, "rb");
 
-    const std::size_t n_layers = network.biases.size();
+    std::uint32_t key = 0, n_layers = 0;
+    fread(&key, sizeof(key), 1, file);
 
-    for(std::size_t i = 0;i < n_layers;i++)
+    if (key != network_key)
+        throw std::runtime_error("Inavlid network file");
+    
+    fread(&key, sizeof(key), 1, file);
+    fread(&n_layers, sizeof(n_layers), 1, file);
+
+    std::vector<std::uint32_t> topology;
+    topology.resize(n_layers);
+
+    for(auto& layer_size : topology)
+        fread(&layer_size, sizeof(layer_size), 1, file);
+
+    for(std::size_t i = 0;i < n_layers - 1;i++)
+    {
         fread(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
-
-    for(std::size_t i = 0;i < n_layers;i++)
         fread(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
+    }
 
+    std::cout << std::hex << "Loaded network '" << path << "' / " << key << std::dec << '\n';
     fclose(file);
 }

@@ -17,5 +17,6 @@ int main(int argc, char** argv)
     const int n_threads = cmdline.get_option("-threads", 1);
 
     Trainer trainer(topology, "C:/tuning/Datasets/8b5ed5872e.txt", n_threads);
+    load_network(trainer.network, "test.nn");
     train_network(trainer);
 }

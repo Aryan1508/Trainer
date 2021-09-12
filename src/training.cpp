@@ -112,7 +112,7 @@ namespace
         StopWatch watch;
         watch.go();
 
-        for(std::size_t i = 0;i < dataset.training.size();i += batch_size)
+        for(std::size_t i = 0;i + batch_size < dataset.training.size();i += batch_size)
         {   
             const float evaluated_percent = i / static_cast<float>(dataset.training.size()) * 100;
             const float elapsed = watch.elapsed_time().count() / 1000.0f;
@@ -134,7 +134,7 @@ void train_network(Trainer& trainer)
 
     print_cost(table, trainer.network, trainer.dataset, 0);
 
-    for(int epoch = 1;epoch <= 5;epoch++)
+    for(int epoch = 1;epoch <= 100;epoch++)
     {
         complete_epoch(trainer);
         print_cost(table, trainer.network, trainer.dataset, epoch);
