@@ -5,6 +5,8 @@
 #include "sample.h"
 #include "neurons.h"
 
+#include <thread>
+
 constexpr float COST_EVAL_WEIGHT = 0.5f;
 constexpr float COST_WDL_WEIGHT  = 1.0f - COST_EVAL_WEIGHT;
 

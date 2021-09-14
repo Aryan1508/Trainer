@@ -13,4 +13,4 @@ struct Trainer
     std::vector<ThreadData> thread_data;  
 };
 
-void train_network(Trainer& trainer, std::string_view output_path);
+void train_network(Trainer& trainer, std::string_view output_path, const int n_epochs);

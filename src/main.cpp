@@ -13,7 +13,9 @@ const std::string HELP_INFO = R"~(
     ./Trainer -threads <number of threads> (default 1)
               -dataset <path to dataset> 
               -samples <number of samples to use> 
+              -base    <path to base network file> (default none, start from random)
               -out     <path to store trained network file> (default trained.nn)
+              -epochs  <number of epochs to run> (default 100)
 )~";
 
 int main(int argc, char** argv)
@@ -27,6 +29,8 @@ int main(int argc, char** argv)
     const auto output_path  = cmdline.get_soption("-out", "trained.nn");
     const auto n_threads    = cmdline.get_ioption("-threads", 1);
     const auto samples      = cmdline.get_ulloption("-samples", 0);
+    const auto base_net     = cmdline.get_soption("-base", "");
+    const auto epochs       = cmdline.get_ioption("-epochs", 100);
 
     if (!dataset_path.size())
     {
@@ -43,5 +47,9 @@ int main(int argc, char** argv)
     }
 
     Trainer trainer(topology, dataset_path, samples, n_threads);
-    train_network(trainer, output_path);
+
+    if (base_net != "")
+        load_network(trainer.network, base_net);
+
+    train_network(trainer, output_path, epochs);
 }

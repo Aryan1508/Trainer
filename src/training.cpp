@@ -23,7 +23,8 @@ namespace
 
     void print_cost(Table& table, Network& network, Dataset const& dataset,int epoch)
     {
-        const float training_cost   = calculate_cost(dataset.training, network);
+        // const float training_cost   = calculate_cost(dataset.training, network);
+        const float training_cost = 0.0f;
         const float validation_cost = calculate_cost(dataset.validation, network);
 
         std::vector<std::string> values;
@@ -71,9 +72,7 @@ namespace
         const std::size_t end = start + size;
 
         for(std::size_t i = start;i < end;i++)
-        {
             calculate_gradients(dataset.training[i], network, thread.neurons, thread.gradients);
-        }
     }
 
     void complete_batch(Trainer& trainer, const std::size_t start)
@@ -127,14 +126,14 @@ namespace
     }
 }
 
-void train_network(Trainer& trainer, std::string_view output_path)
+void train_network(Trainer& trainer, std::string_view output_path, const int n_epochs)
 {
     Table table(std::cout, 32, {"Epoch", "Training", "Validation"});
     table.print_headers();
 
     print_cost(table, trainer.network, trainer.dataset, 0);
 
-    for(int epoch = 1;epoch <= 100;epoch++)
+    for(int epoch = 1;epoch <= n_epochs;epoch++)
     {
         complete_epoch(trainer);
         print_cost(table, trainer.network, trainer.dataset, epoch);

@@ -4,7 +4,7 @@
 
 typedef float(*ActivationFunction)(float);
 
-constexpr float sigmoid_scale = 2.5f / 1024.0f;
+constexpr float sigmoid_scale = 4.0f / 1024.0f;
 
 inline float sigmoid(float x)
 {
