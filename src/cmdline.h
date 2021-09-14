@@ -24,6 +24,34 @@ public:
         options = std::vector<std::string>(argv, argv + argc);
     }
 
+    
+
+    template<typename T, typename Conv> 
+    T get_option(std::string_view key, T const& default_value, Conv convert) const
+    {
+        std::string value = get_option(key);
+        return value.size() ? convert(value) : default_value;
+    }   
+
+    int get_ioption(std::string_view key, const int default_value) const
+    {
+        return get_option<int>(key, default_value, 
+            [](std::string const& val) { return std::stoi(val); });
+    }
+
+    std::size_t get_ulloption(std::string_view key, const std::size_t default_value) const
+    {
+        return get_option<std::size_t>(key, default_value,
+            [](std::string const& val) { return std::stoull(val); });
+    }
+
+    std::string get_soption(std::string_view key, std::string const& default_value) const 
+    {
+        return get_option<std::string>(key, default_value,
+            [](std::string const& val) { return val; });
+    }
+
+private:
     std::string get_option(std::string_view key) const
     {
         for(std::size_t i = 0;i < options.size();i++)
@@ -35,11 +63,6 @@ public:
         return "";
     }
 
-    int get_option(std::string_view key, int default_value) const
-    {
-        std::string value = get_option(key);
-        return value.size() ? std::stoi(value) : default_value;
-    }
 private:
     std::vector<std::string> options;
 };

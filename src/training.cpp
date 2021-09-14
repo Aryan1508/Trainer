@@ -127,7 +127,7 @@ namespace
     }
 }
 
-void train_network(Trainer& trainer)
+void train_network(Trainer& trainer, std::string_view output_path)
 {
     Table table(std::cout, 32, {"Epoch", "Training", "Validation"});
     table.print_headers();
@@ -138,12 +138,12 @@ void train_network(Trainer& trainer)
     {
         complete_epoch(trainer);
         print_cost(table, trainer.network, trainer.dataset, epoch);
-        save_network(trainer.network, "test.nn");
+        save_network(trainer.network, output_path);
     }
 }
 
-Trainer::Trainer(std::vector<int> const& topology, std::string_view dataset_path, const int n_threads)
-    : dataset(dataset_path), network(topology), thread_data(n_threads, ThreadData(topology))
+Trainer::Trainer(std::vector<int> const& topology, std::string_view dataset_path, const std::size_t sample_size, const int n_threads)
+    : dataset(dataset_path, sample_size), network(topology), thread_data(n_threads, ThreadData(topology))
 {
     if (n_threads <= 0)
         throw std::invalid_argument("Invalid thread count");
