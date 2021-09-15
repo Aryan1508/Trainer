@@ -13,7 +13,7 @@ inline std::string_view extract_fen(std::string_view line)
 
 inline int extract_score(std::string_view line)
 {
-    return std::clamp(std::stoi(line.substr(line.find("]") + 1).data()), -2000, 2000);
+    return std::stoi(line.substr(line.find("]") + 1).data());
 }
 
 inline float extract_wdl(std::string_view line)
