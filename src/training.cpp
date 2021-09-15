@@ -21,11 +21,10 @@ namespace
         return ss.str();
     }
 
-    void print_cost(Table& table, Network& network, Dataset const& dataset,int epoch)
+    void print_cost(Table& table, Trainer const& trainer, int epoch)
     {
-        // const float training_cost   = calculate_cost(dataset.training, network);
-        const float training_cost = 0.0f;
-        const float validation_cost = calculate_cost(dataset.validation, network);
+        const float training_cost   = calculate_average_cost(trainer.network, trainer.dataset.training, trainer.n_threads);
+        const float validation_cost = calculate_average_cost(trainer.network, trainer.dataset.validation, trainer.n_threads);
 
         std::vector<std::string> values;
         values.push_back(std::to_string(epoch));
@@ -131,18 +130,18 @@ void train_network(Trainer& trainer, std::string_view output_path, const int n_e
     Table table(std::cout, 32, {"Epoch", "Training", "Validation"});
     table.print_headers();
 
-    print_cost(table, trainer.network, trainer.dataset, 0);
+    print_cost(table, trainer, 0);
 
     for(int epoch = 1;epoch <= n_epochs;epoch++)
     {
         complete_epoch(trainer);
-        print_cost(table, trainer.network, trainer.dataset, epoch);
+        print_cost(table, trainer, epoch);
         save_network(trainer.network, output_path);
     }
 }
 
 Trainer::Trainer(std::vector<int> const& topology, std::string_view dataset_path, const std::size_t sample_size, const int n_threads)
-    : dataset(dataset_path, sample_size), network(topology), thread_data(n_threads, ThreadData(topology))
+    : dataset(dataset_path, sample_size), network(topology), thread_data(n_threads, ThreadData(topology)), n_threads(n_threads)
 {
     if (n_threads <= 0)
         throw std::invalid_argument("Invalid thread count");

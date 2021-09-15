@@ -11,6 +11,7 @@ struct Trainer
     Dataset dataset;
     Network network;
     std::vector<ThreadData> thread_data;  
+    const int n_threads;
 };
 
 void train_network(Trainer& trainer, std::string_view output_path, const int n_epochs);

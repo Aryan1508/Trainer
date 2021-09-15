@@ -6,6 +6,7 @@
 #include "neurons.h"
 
 #include <thread>
+#include <algorithm>
 
 constexpr float COST_EVAL_WEIGHT = 0.5f;
 constexpr float COST_WDL_WEIGHT  = 1.0f - COST_EVAL_WEIGHT;
@@ -18,15 +19,35 @@ inline float calculate_cost(Sample const& sample, Network const& network, Neuron
           + COST_WDL_WEIGHT  * powf(output - sample.wdl_target , 2.0f);
 }
 
-inline float calculate_cost(std::vector<Sample> const& samples, Network const& network)
+inline float calculate_total_cost(Network const& network, 
+    std::vector<Sample>::const_iterator begin, std::vector<Sample>::const_iterator end, float& sum)
 {
-    float cost = 0.0f;
     Neurons neurons(get_topology(network));
 
-    for(auto const& sample : samples)
-        cost += calculate_cost(sample, network, neurons);
+    while(begin++ != end)
+        sum += calculate_cost(*begin, network, neurons);
 
-    return cost / static_cast<float>(samples.size());
+    return sum;
+}
+
+inline float calculate_average_cost(Network const& network, std::vector<Sample> const& samples, const int n_threads)
+{
+    const std::size_t local_size = samples.size() / n_threads;
+    const std::size_t total      = local_size * n_threads;
+
+    std::vector<std::thread> threads;
+    std::vector<float> sums(n_threads, 0.0f);
+
+    for(int i = 0;i < n_threads;i++)
+    {
+        const auto begin = samples.begin() + i * local_size;
+        const auto end   = begin + local_size; 
+        threads.emplace_back(calculate_total_cost, std::ref(network), begin, end, std::ref(sums[i]));
+    }
+
+    for(auto& thread : threads) thread.join();
+
+    return std::accumulate(sums.begin(), sums.end(), 0.0f) / static_cast<float>(total);
 }
 
 inline float calculate_cost_gradient(Sample const& sample, const float output)

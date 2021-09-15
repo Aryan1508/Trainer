@@ -17,16 +17,18 @@ struct Dataset
 
         std::cout.precision(2);
 
-        const std::size_t training_size = 0.95 * limit;
+        const std::size_t training_size = 0.9 * limit;
 
         std::size_t total_read = 0;
+        training.reserve(training_size);
+
         for(std::string line; std::getline(file, line);)
         {
             if (total_read >= training_size)
                 validation.push_back(Sample(line));
             else 
                 training.push_back(Sample(line));
-
+                
             if (++total_read >= limit)
                 break;
 
@@ -39,7 +41,7 @@ struct Dataset
         }
 
         std::cout << '\r' << std::string(' ', 32);
-        std::cout << "\rLoaded dataset '" << path << "' (" << training.size() + validation.size() << " samples)" << std::endl;
+        std::cout << "\rLoaded dataset '" << path << "' (" << total_read << " samples)" << std::endl;
     }
 
     std::vector<Sample> training;
