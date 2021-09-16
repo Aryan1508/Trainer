@@ -137,9 +137,6 @@ void train_network(Trainer& trainer, std::string_view output_path, const int n_e
         complete_epoch(trainer);
         print_cost(table, trainer, epoch);
         save_network(trainer.network, output_path);
-
-        if (epoch % 20 == 0)
-            Gradient::LR /= 1.1f;
     }
 }
 

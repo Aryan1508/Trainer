@@ -16,6 +16,7 @@ const std::string HELP_INFO = R"~(
               -base    <path to base network file> (default none, start from random)
               -out     <path to store trained network file> (default trained.nn)
               -epochs  <number of epochs to run> (default 100)
+              -lr <initial earning rate> (default 0.1)
 )~";
 
 int main(int argc, char** argv)
@@ -31,6 +32,7 @@ int main(int argc, char** argv)
     const auto samples      = cmdline.get_ulloption("-samples", 0);
     const auto base_net     = cmdline.get_soption("-base", "");
     const auto epochs       = cmdline.get_ioption("-epochs", 100);
+    Gradient::LR            = cmdline.get_foption("-lr", 0.1f);
 
     if (!dataset_path.size())
     {

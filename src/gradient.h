@@ -9,7 +9,7 @@ struct Gradient
     static float LR;
 };
 
-inline float Gradient::LR = 0.01f;
+inline float Gradient::LR = 0.1f;
 
 inline void update_gradient(Gradient& grad, const float delta)
 {   

@@ -24,8 +24,6 @@ public:
         options = std::vector<std::string>(argv, argv + argc);
     }
 
-    
-
     template<typename T, typename Conv> 
     T get_option(std::string_view key, T const& default_value, Conv convert) const
     {
@@ -38,6 +36,13 @@ public:
         return get_option<int>(key, default_value, 
             [](std::string const& val) { return std::stoi(val); });
     }
+
+    float get_foption(std::string_view key, const float default_value) const
+    {
+        return get_option<float>(key, default_value, 
+            [](std::string const& val) { return std::stof(val); });
+    }
+
 
     std::size_t get_ulloption(std::string_view key, const std::size_t default_value) const
     {
