@@ -111,16 +111,19 @@ void calculate_gradients(Sample const& sample, Network const& network, Neurons& 
         auto& bias_grads   = gradients.bias_gradients[layer];
         auto& activations  = neurons.activations[layer - 1];
 
-        for(int i = 0;i < bias_grads.size();i++)
+        for(int i = 0;i < weight_grads.cols();i++)
         {
-            const float gradient = errors[layer](i);
-            update_gradient(bias_grads(i), gradient);
-
             for(int j = 0;j < weight_grads.rows();j++)
             {
                 const float gradient = activations(i) * errors[layer](j);
                 update_gradient(weight_grads(j, i), gradient);
             }
+        }
+
+        for(int i = 0;i < bias_grads.size();i++)
+        {
+            const float gradient = errors[layer](i);
+            update_gradient(bias_grads(i), gradient);
         }
     }
 }
