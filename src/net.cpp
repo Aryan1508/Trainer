@@ -79,30 +79,20 @@ std::uint32_t hash_network(Network const& network)
     return std::hash<float>{}(sum);
 }
 
-constexpr std::uint32_t network_key = 1113194752;
-
 void save_network(Network const& network, std::string_view path)
 {
     const char* p = path.data();
     FILE* file = fopen(p, "wb");
 
-    const auto topology = get_topology(network);
     const std::uint32_t hash     = hash_network(network);
-    const std::uint32_t n_layers = static_cast<std::uint32_t>(topology.size());
+    const std::uint32_t n_layers = network.biases.size() + 1;
 
-    fwrite(&network_key  , sizeof(std::uint32_t), 1, file);
-    fwrite(&hash         , sizeof(std::uint32_t), 1, file);  
-    fwrite(&n_layers     , sizeof(std::uint32_t), 1, file);
-
-    for(const std::uint32_t layer_size : topology)
-        fwrite(&layer_size, sizeof(std::uint32_t), 1, file);
-
+    fwrite(&hash, sizeof(std::uint32_t), 1, file);  
     for(std::size_t i = 0;i < n_layers - 1;i++)
     {
         fwrite(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
         fwrite(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
     }
-
     fclose(file);
 }
 
@@ -111,27 +101,13 @@ void load_network(Network& network, std::string_view path)
     const char* p = path.data();
     FILE* file = fopen(p, "rb");
 
-    std::uint32_t key = 0, n_layers = 0;
-    fread(&key, sizeof(key), 1, file);
-
-    if (key != network_key)
-        throw std::runtime_error("Inavlid network file");
-    
-    fread(&key, sizeof(key), 1, file);
-    fread(&n_layers, sizeof(n_layers), 1, file);
-
-    std::vector<std::uint32_t> topology;
-    topology.resize(n_layers);
-
-    for(auto& layer_size : topology)
-        fread(&layer_size, sizeof(layer_size), 1, file);
-
-    for(std::size_t i = 0;i < n_layers - 1;i++)
+    std::uint32_t hash = 0;
+    fread(&hash, sizeof(hash), 1, file);
+    for(std::size_t i = 0;i < network.biases.size();i++)
     {
         fread(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
         fread(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
     }
-
-    std::cout << std::hex << "Loaded network '" << path << "' / " << key << std::dec << '\n';
     fclose(file);
+    std::cout << std::hex << "Loaded network '" << path << "' / " << hash << std::dec << '\n';
 }
