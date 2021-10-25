@@ -3,6 +3,7 @@
 #include "sample.h"
 #include "matmul.h"
 #include "neurons.h"
+#include "optimize.h"
 
 #include <vector>
 #include <random>
@@ -79,11 +80,8 @@ std::uint32_t hash_network(Network const& network)
     return std::hash<float>{}(sum);
 }
 
-void save_network(Network const& network, std::string_view path)
+void save_network(Network const& network, FILE* file) 
 {
-    const char* p = path.data();
-    FILE* file = fopen(p, "wb");
-
     const std::uint32_t hash     = hash_network(network);
     const std::uint32_t n_layers = network.biases.size() + 1;
 
@@ -93,14 +91,34 @@ void save_network(Network const& network, std::string_view path)
         fwrite(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
         fwrite(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
     }
+}
+
+void save_network(Network const& network, std::string_view path)
+{
+    const char* p = path.data();
+    FILE* file = fopen(p, "wb");
+    save_network(network, file);
     fclose(file);
 }
 
-void load_network(Network& network, std::string_view path)
+// write gradients for re-loading 
+void save_network(Network const& network, Gradients const& gradients, std::string_view path) 
 {
     const char* p = path.data();
-    FILE* file = fopen(p, "rb");
+    FILE* file = fopen(p, "wb");
+    save_network(network, file);
 
+    const std::uint32_t n_layers = network.biases.size() + 1;
+    for(std::size_t i = 0;i < n_layers - 1;i++) 
+    {
+        fwrite(gradients.weight_gradients[i].raw(), sizeof(Gradient), gradients.weight_gradients[i].size(), file);
+        fwrite(gradients.bias_gradients[i].raw(), sizeof(Gradient), gradients.bias_gradients[i].size(), file);
+    }
+    fclose(file);
+}
+
+std::uint32_t load_network(Network& network, FILE* file) 
+{
     std::uint32_t hash = 0;
     fread(&hash, sizeof(hash), 1, file);
     for(std::size_t i = 0;i < network.biases.size();i++)
@@ -108,6 +126,30 @@ void load_network(Network& network, std::string_view path)
         fread(network.weights[i].raw(), sizeof(float), network.weights[i].size(), file);
         fread(network.biases[i].raw(), sizeof(float), network.biases[i].size(), file);
     }
+    return hash;
+}
+
+void load_network(Network& network, Gradients& gradients, std::string_view path) 
+{
+    const char* p = path.data();
+    FILE* file = fopen(p, "rb");
+    const std::uint32_t hash  = load_network(network, file);
+
+    for(std::size_t i = 0;i < network.biases.size();i++)
+    {
+        fread(gradients.weight_gradients[i].raw(), sizeof(Gradient), gradients.weight_gradients[i].size(), file);
+        fread(gradients.bias_gradients[i].raw(), sizeof(Gradient), gradients.bias_gradients[i].size(), file);
+    }
+        
+    fclose(file);
+    std::cout << std::hex << "Loaded network '" << path << "' / " << hash << std::dec << '\n';
+}
+
+void load_network(Network& network, std::string_view path)
+{
+    const char* p = path.data();
+    FILE* file = fopen(p, "rb");
+    const std::uint32_t hash  = load_network(network, file);
     fclose(file);
     std::cout << std::hex << "Loaded network '" << path << "' / " << hash << std::dec << '\n';
 }

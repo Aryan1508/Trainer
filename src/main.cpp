@@ -13,9 +13,10 @@ const std::string HELP_INFO = R"~(
     ./Trainer -threads <number of threads> (default 1)
               -dataset <path to dataset> 
               -samples <number of samples to use> 
-              -base    <path to base network file> (default none, start from random)
-              -out     <path to store trained network file> (default trained.nn)
+              -base    <path to base network file (.tnn)> (default none, start from random)
+              -out     <path to store trained network file> (default trained)
               -epochs  <number of epochs to run> (default 100)
+              -batch   <size of one batch> (default 16384)
               -lr <initial earning rate> (default 0.01)
 )~";
 
@@ -25,14 +26,15 @@ int main(int argc, char** argv)
 
     std::cout << HELP_INFO << std::endl;
 
-    const std::vector<int> topology{768, 128, 1};
+    const std::vector<int> topology{768, 256, 1};
     const auto dataset_path = cmdline.get_soption("-dataset", "");
-    const auto output_path  = cmdline.get_soption("-out", "trained.nn");
+    const auto output_path  = cmdline.get_soption("-out", "trained");
     const auto n_threads    = cmdline.get_ioption("-threads", 1);
     const auto samples      = cmdline.get_ulloption("-samples", 0);
     const auto base_net     = cmdline.get_soption("-base", "");
     const auto epochs       = cmdline.get_ioption("-epochs", 100);
-    Gradient::LR            = cmdline.get_foption("-lr", 0.01f);
+    LEARNING_RATE           = cmdline.get_foption("-lr", 0.01f);
+    BATCH_SIZE              = cmdline.get_ioption("-batch", 16384);
 
     if (!dataset_path.size())
     {
@@ -51,7 +53,7 @@ int main(int argc, char** argv)
     Trainer trainer(topology, dataset_path, samples, n_threads);
 
     if (base_net != "")
-        load_network(trainer.network, base_net);
+        load_network(trainer.network, trainer.thread_data[0].gradients, base_net);
 
     train_network(trainer, output_path, epochs);
 }

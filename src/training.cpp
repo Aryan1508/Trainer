@@ -11,7 +11,6 @@
 
 namespace 
 {
-    constexpr int batch_size = 16384;
     constexpr int max_epochs = 256;
 
     std::string ftos(float value)
@@ -76,7 +75,7 @@ namespace
 
     void complete_batch(Trainer& trainer, const std::size_t start)
     {
-        const std::size_t local_batch_size = batch_size / trainer.thread_data.size();
+        const std::size_t local_batch_size = BATCH_SIZE / trainer.thread_data.size();
 
         std::vector<std::thread> threads;
 
@@ -110,7 +109,7 @@ namespace
         StopWatch watch;
         watch.go();
 
-        for(std::size_t i = 0;i + batch_size < dataset.training.size();i += batch_size)
+        for(std::size_t i = 0;i + BATCH_SIZE < dataset.training.size();i += BATCH_SIZE)
         {   
             const float evaluated_percent = i / static_cast<float>(dataset.training.size()) * 100;
             const float elapsed = watch.elapsed_time().count() / 1000.0f;
@@ -136,7 +135,11 @@ void train_network(Trainer& trainer, std::string_view output_path, const int n_e
     {
         complete_epoch(trainer);
         print_cost(table, trainer, epoch);
-        save_network(trainer.network, output_path);
+
+        std::string network_file_name = std::string(output_path) + "_epoch_" + std::to_string(epoch) + ".nn";
+        std::string trainer_file_name = std::string(output_path) + "_epoch_" + std::to_string(epoch) + ".tnn";
+        save_network(trainer.network, network_file_name);
+        save_network(trainer.network, trainer.thread_data[0].gradients, trainer_file_name);
     }
 }
 

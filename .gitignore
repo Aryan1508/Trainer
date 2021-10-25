@@ -2,3 +2,4 @@
 src/*.exe
 src/*.nn
 src/Trainer
+src/*.tnn

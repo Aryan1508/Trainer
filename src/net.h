@@ -5,6 +5,7 @@
 
 struct Neurons;
 struct Input;
+struct Gradients;
 
 struct Network
 {
@@ -16,6 +17,8 @@ struct Network
 
 float forward_propagate(Input const& input, Network const&, Neurons& neurons);
 
+void save_network(Network const&, Gradients const&, std::string_view path); 
+void load_network(Network&      , Gradients&      , std::string_view path);
 void save_network(Network const&, std::string_view path);
 void load_network(Network&      , std::string_view path);
 

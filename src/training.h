@@ -4,6 +4,8 @@
 #include <vector>
 #include <string_view>
 
+inline int BATCH_SIZE = 16384;
+
 struct Trainer
 {
     Trainer(std::vector<int> const& topology, std::string_view dataset_path, const std::size_t sample_size, const int n_threads);
