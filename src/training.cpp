@@ -126,6 +126,11 @@ namespace
 
 void train_network(Trainer& trainer, std::string_view output_path, const int n_epochs)
 {
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(trainer.dataset.training.begin(), trainer.dataset.training.end(), g);
+    std::shuffle(trainer.dataset.validation.begin(), trainer.dataset.validation.end(), g);
+    
     Table table(std::cout, 32, {"Epoch", "Training", "Validation"});
     table.print_headers();
 
