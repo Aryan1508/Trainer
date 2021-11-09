@@ -16,7 +16,7 @@ inline float calculate_cost(Sample const& sample, Network const& network, Neuron
     const float output = forward_propagate(sample.input, network, neurons);
     
     return  COST_EVAL_WEIGHT * powf(output - sample.eval_target, 2.0f)
-          + COST_WDL_WEIGHT  * powf(output - sample.wdl_target , 2.0f);
+          + COST_WDL_WEIGHT  * powf(output - calculate_wdl_target(sample.wdl_value), 2.0f);
 }
 
 inline float calculate_total_cost(Network const& network, 
@@ -53,5 +53,5 @@ inline float calculate_average_cost(Network const& network, std::vector<Sample> 
 inline float calculate_cost_gradient(Sample const& sample, const float output)
 {
     return    2.0f * COST_EVAL_WEIGHT * (output - sample.eval_target)
-            + 2.0f * COST_WDL_WEIGHT  * (output - sample.wdl_target);
+            + 2.0f * COST_WDL_WEIGHT  * (output - calculate_wdl_target(sample.wdl_value));
 }
