@@ -15,11 +15,8 @@ public:
 
     void set_fen(std::string_view fen);
 
-    std::string get_fen() const;
-
     Features to_features() const;
 private:
-
     std::array<HighLowByte, 16> piece_nibbles;
     uint64_t occupancy;
 };
