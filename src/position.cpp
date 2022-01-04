@@ -72,7 +72,7 @@ Features Position::to_features() const
         Piece  pce = n % 2 == 0 ? static_cast<Piece>(piece_nibbles[n / 2].get_low_nibble()) 
                                 : static_cast<Piece>(piece_nibbles[n / 2].get_high_nibble());
 
-        features.push_back(pce * 64 + lsb);
+        features.push_back(pce * 64 + flip_square(lsb));
         n++;
     }
     return features;
