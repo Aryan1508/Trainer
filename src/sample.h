@@ -1,5 +1,4 @@
 #pragma once
-#include "input.h"
 #include "position.h"
 #include "activation.h"
 
@@ -34,14 +33,13 @@ inline float calculate_wdl_target(uint8_t wdl_value)
 struct Sample
 {
     Sample(std::string_view str)
-        : input(Position(extract_fen(str)))
+        : position(extract_fen(str))
     {
         eval_target = sigmoid(extract_score(str));
         wdl_value  = extract_wdl(str);
     }   
 
-    Input input;
-
-    float eval_target = 0;
-    uint8_t wdl_value = 0;
+    Position position;
+    float    eval_target = 0;
+    uint8_t  wdl_value = 0;
 };

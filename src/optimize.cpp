@@ -18,7 +18,7 @@ Gradients::Gradients(std::vector<int> const& topology)
 
 float calculate_output_gradient(Sample const& sample, Network const& network, Neurons& neurons)
 {
-    const float output = forward_propagate(sample.input, network, neurons);
+    const float output = forward_propagate(sample.position.to_features(), network, neurons);
     return calculate_output_gradient(sample, output);
 }
 
@@ -88,7 +88,7 @@ void calculate_hidden_gradients(Sample const& sample, Gradients& gradients, std:
     auto& bias_gradients   = gradients.bias_gradients[0];
     auto& hidden_errors    = errors[0];
 
-    for(auto input_layer_index : sample.input.indices)
+    for(auto input_layer_index : sample.position.to_features())
     {
         for(int i = 0;i < hidden_errors.size();i++)
             update_gradient(weight_gradients(i, input_layer_index), hidden_errors(i));
