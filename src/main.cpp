@@ -10,14 +10,23 @@
 #include <iostream>
 
 const std::string HELP_INFO = R"~(
-    ./Trainer -threads <number of threads> (default 1)
-              -dataset <path to dataset> 
-              -samples <number of samples to use> 
-              -base    <path to base network file (.tnn)> (default none, start from random)
-              -out     <path to store trained network file> (default trained)
-              -epochs  <number of epochs to run> (default 100)
-              -batch   <size of one batch> (default 16384)
-              -lr <initial earning rate> (default 0.01)
+    -------------------------------------------------------------------------------------------------------------
+    |  Option Name   |          Description                  |                   DEFAULT                        |
+    |----------------+---------------------------------------+--------------------------------------------------+-
+    |  -samples      |    number of samples to read          |  no default, must be provided                    |                      
+    |  -dataset      |    path to dataset                    |  no default, must be provided                    |   
+    |  -threads      |    number of threads to use           |  1                                               |    
+    |  -base         |    path to base network file (.tnn)   |  none (start from randomly initialized network)  |    
+    |  -out          |    path to store trained network file | 'trained'                                        |    
+    |  -epochs       |    number of epochs to run            |  100                                             |
+    |  -batch        |    size of one batch                  |  16384                                           |
+    |  -lr           |    initial earning rate               |  default 0.01)                                   |    
+    |  -lrdrop       |    number of epochs to drop lr after  |  none (no drop)                                  |
+    |  -lrdrop_rate  |    factor by which lr is dropped      |  0.1  (only applicable if -lrdrop is provided)   |
+
+                                USAGE 
+         ./Trainer [OPTION NAME] [OPTION VALUE]  
+         ./Trainer -threads 8 -dataset C:/datasets/dataset.txt ...
 )~";
 
 int main(int argc, char** argv)
@@ -33,8 +42,14 @@ int main(int argc, char** argv)
     const auto samples      = cmdline.get_ulloption("-samples", 0);
     const auto base_net     = cmdline.get_soption("-base", "");
     const auto epochs       = cmdline.get_ioption("-epochs", 100);
-    LEARNING_RATE           = cmdline.get_foption("-lr", 0.01f);
+    LR                      = cmdline.get_foption("-lr", 0.01f);
     BATCH_SIZE              = cmdline.get_ioption("-batch", 16384);
+    LR_DROP_EPOCHS          = cmdline.get_ioption("-lrdrop", -1);
+
+    if (LR_DROP_EPOCHS != -1) {
+        SHOULD_LR_DROP = true;
+        LR_DROP_RATE   = cmdline.get_foption("-lrdrop_rate", 0.1f);
+    }
 
     if (!dataset_path.size())
     {

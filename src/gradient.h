@@ -1,7 +1,10 @@
 #pragma once 
 #include <cmath>
 
-inline float LEARNING_RATE = 0.01f;
+inline float LR = 0.01f;
+inline int   LR_DROP_EPOCHS = 40;
+inline bool  SHOULD_LR_DROP = false;
+inline float LR_DROP_RATE = 0.1f;
 
 struct Gradient 
 {
@@ -26,7 +29,7 @@ inline float calculate_gradient(Gradient& grad)
     grad.moment_1 = grad.moment_1 * BETA_1 + grad.value * (1.0f - BETA_1);
     grad.moment_2 = grad.moment_2 * BETA_2 + (grad.value * grad.value) * (1.0f - BETA_2);
 
-    return LEARNING_RATE * grad.moment_1 / (std::sqrt(grad.moment_2) + 1e-8);
+    return LR * grad.moment_1 / (std::sqrt(grad.moment_2) + 1e-8);
 }
 
 inline void apply_gradient(Gradient& grad, float& parameter)

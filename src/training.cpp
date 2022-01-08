@@ -138,6 +138,9 @@ void train_network(Trainer& trainer, std::string_view output_path, const int n_e
 
     for(int epoch = 1;epoch <= n_epochs;epoch++)
     {
+        if (SHOULD_LR_DROP && epoch % LR_DROP_EPOCHS == 0)
+            LR *= LR_DROP_RATE;
+
         complete_epoch(trainer);
         print_cost(table, trainer, epoch);
 
