@@ -1,5 +1,5 @@
 #pragma once
-#include "input.h"
+#include "features.h"
 #include "matrix.h"
 #include "activation.h"
 
@@ -20,7 +20,7 @@ void forward_propagate(Matrix<float> const& input,
     }
 }
 
-void forward_propagate(Input         const& input, 
+void forward_propagate(Features         const& input, 
                         Matrix<float>      & output, 
                         Matrix<float> const& weights, 
                         Matrix<float> const& biases,
@@ -28,7 +28,7 @@ void forward_propagate(Input         const& input,
 {
     output.set(0.0f);
 
-    for(auto input_index : input.indices)
+    for(auto input_index : input)
     {   
         for(int i = 0;i < output.size();i++)
             output(i) += weights(i, input_index);

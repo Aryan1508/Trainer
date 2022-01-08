@@ -1,10 +1,10 @@
 #pragma once
 #include "matrix.h"
+#include "position.h"
 
 #include <vector>
 
 struct Neurons;
-struct Input;
 struct Gradients;
 
 struct Network
@@ -15,7 +15,7 @@ struct Network
     std::vector<Matrix<float>> biases;
 };
 
-float forward_propagate(Input const& input, Network const&, Neurons& neurons);
+float forward_propagate(Features const& input, Network const&, Neurons& neurons);
 
 void save_network(Network const&, Gradients const&, std::string_view path); 
 void load_network(Network&      , Gradients&      , std::string_view path);

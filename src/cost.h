@@ -13,7 +13,7 @@ constexpr float COST_WDL_WEIGHT  = 1.0f - COST_EVAL_WEIGHT;
 
 inline float calculate_cost(Sample const& sample, Network const& network, Neurons& neurons)
 {
-    const float output = forward_propagate(sample.input, network, neurons);
+    const float output = forward_propagate(sample.position.to_features(), network, neurons);
     
     return  COST_EVAL_WEIGHT * powf(output - sample.eval_target, 2.0f)
           + COST_WDL_WEIGHT  * powf(output - calculate_wdl_target(sample.wdl_value), 2.0f);

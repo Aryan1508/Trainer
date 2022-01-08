@@ -35,7 +35,7 @@ Network::Network(std::vector<int> const& topology)
     }
 }
 
-float forward_propagate(Input const& input, Network const& network, Neurons& neurons)
+float forward_propagate(Features const& input, Network const& network, Neurons& neurons)
 {
     forward_propagate(input,
                       neurons.activations[0],
@@ -61,7 +61,7 @@ std::vector<int> get_topology(Network const& network)
 {
     std::vector<int> topology;
 
-    topology.push_back(network.weights[0].cols()); // Input layer
+    topology.push_back(network.weights[0].cols()); // Features layer
 
     for(auto const& layer : network.biases)
         topology.push_back(layer.size());
